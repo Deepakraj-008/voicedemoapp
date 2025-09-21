@@ -241,10 +241,12 @@ class _VoiceOnboardingState extends State<VoiceOnboarding>
     try {
       if (await _audioRecorder.hasPermission()) {
         if (kIsWeb) {
-          await _audioRecorder
-              .start(const RecordConfig(encoder: AudioEncoder.wav, path: 'temp_recording.wav'));
+          await _audioRecorder.start(
+              const RecordConfig(encoder: AudioEncoder.wav),
+              path: 'temp_recording.wav');
         } else {
-          await _audioRecorder.start(const RecordConfig(path: 'temp_recording'));
+          await _audioRecorder.start(const RecordConfig(),
+              path: 'temp_recording');
         }
 
         // Simulate voice detection after 3 seconds

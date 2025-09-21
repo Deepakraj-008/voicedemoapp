@@ -1,6 +1,7 @@
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:audio_waveforms/audio_waveforms.dart';
 
 import '../../../core/app_export.dart';
 import '../../../theme/app_theme.dart';
@@ -129,12 +130,16 @@ class _VoiceWaveformWidgetState extends State<VoiceWaveformWidget>
   }
 
   Widget _buildPlaybackWaveform() {
+    // For playback, we need to use the recorderController since AudioWaveforms
+    // only accepts RecorderController. The playerController is used for
+    // audio playback, but the waveform visualization uses the same recorderController
+    // that was used during recording.
     return Container(
       width: 70.w,
       height: 8.h,
       child: AudioWaveforms(
         size: Size(70.w, 8.h),
-        recorderController: widget.playerController!,
+        recorderController: widget.recorderController ?? RecorderController(),
         enableGesture: true,
         waveStyle: WaveStyle(
           waveColor: AppTheme.lightTheme.primaryColor.withValues(alpha: 0.6),

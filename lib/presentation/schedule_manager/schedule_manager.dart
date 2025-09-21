@@ -703,7 +703,9 @@ class _ScheduleManagerState extends State<ScheduleManager>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          existingIndex != -1
+          _allSessions.indexWhere(
+                      (session) => session['id'] == sessionData['id']) !=
+                  -1
               ? 'Session updated successfully'
               : 'Session scheduled successfully',
         ),

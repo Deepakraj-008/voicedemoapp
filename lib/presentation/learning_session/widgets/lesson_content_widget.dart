@@ -3,6 +3,7 @@ import 'package:flutter_code_editor/flutter_code_editor.dart';
 import 'package:sizer/sizer.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter_highlight/flutter_highlight.dart';
+import 'package:highlight/highlight.dart';
 import 'package:highlight/languages/dart.dart' as highlight_dart;
 import 'package:highlight/languages/python.dart' as highlight_python;
 import 'package:highlight/languages/javascript.dart' as highlight_javascript;
@@ -61,19 +62,19 @@ class _LessonContentWidgetState extends State<LessonContentWidget> {
     }
   }
 
-  Language _getLanguageFromType(String type) {
+  dynamic _getLanguageFromType(String type) {
     switch (type.toLowerCase()) {
       case 'python':
-        return Language.python;
+        return highlight_python.python;
       case 'javascript':
-        return Language.javascript;
+        return highlight_javascript.javascript;
       case 'java':
-        return Language.java;
+        return highlight_java.java;
       case 'cpp':
       case 'c++':
-        return Language.cpp;
+        return highlight_cpp.cpp;
       default:
-        return Language.dart;
+        return highlight_dart.dart;
     }
   }
 

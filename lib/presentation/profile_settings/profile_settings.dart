@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:sweetyai_learning_assistant/presentation/profile_settings/privacy_controls_widget.dart' show PrivacyControlsWidget;
 
 import '../../core/app_export.dart';
 import './widgets/accessibility_settings_widget.dart';
 import './widgets/account_settings_widget.dart';
 import './widgets/learning_preferences_widget.dart';
-import './widgets/privacy_controls_widget.dart';
 import './widgets/profile_header_widget.dart';
 import './widgets/voice_settings_widget.dart';
 

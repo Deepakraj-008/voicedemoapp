@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sweetyai_learning_assistant/presentation/course_details/course_details.dart' show CourseDetail;
 import '../presentation/progress_analytics/progress_analytics.dart';
 import '../presentation/registration/registration.dart';
 import '../presentation/splash_screen/splash_screen.dart';

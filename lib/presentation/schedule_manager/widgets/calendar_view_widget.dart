@@ -147,17 +147,17 @@ class _CalendarViewWidgetState extends State<CalendarViewWidget> {
       },
       calendarStyle: CalendarStyle(
         outsideDaysVisible: false,
-        weekendTextStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        weekendTextStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
           color: colorScheme.error,
         ),
-        holidayTextStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        holidayTextStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
           color: colorScheme.error,
         ),
         selectedDecoration: BoxDecoration(
           color: colorScheme.primary,
           shape: BoxShape.circle,
         ),
-        selectedTextStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        selectedTextStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
           color: colorScheme.onPrimary,
           fontWeight: FontWeight.w600,
         ),
@@ -165,11 +165,11 @@ class _CalendarViewWidgetState extends State<CalendarViewWidget> {
           color: colorScheme.secondary.withValues(alpha: 0.7),
           shape: BoxShape.circle,
         ),
-        todayTextStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        todayTextStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
           color: colorScheme.onSecondary,
           fontWeight: FontWeight.w600,
         ),
-        defaultTextStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        defaultTextStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
           color: colorScheme.onSurface,
         ),
         markerDecoration: BoxDecoration(
@@ -188,11 +188,11 @@ class _CalendarViewWidgetState extends State<CalendarViewWidget> {
         headerMargin: EdgeInsets.zero,
       ),
       daysOfWeekStyle: DaysOfWeekStyle(
-        weekdayStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
+        weekdayStyle: Theme.of(context).textTheme.labelMedium!.copyWith(
           color: colorScheme.onSurface.withValues(alpha: 0.7),
           fontWeight: FontWeight.w500,
         ),
-        weekendStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
+        weekendStyle: Theme.of(context).textTheme.labelMedium!.copyWith(
           color: colorScheme.error.withValues(alpha: 0.7),
           fontWeight: FontWeight.w500,
         ),
