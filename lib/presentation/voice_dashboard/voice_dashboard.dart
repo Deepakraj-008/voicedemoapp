@@ -86,16 +86,16 @@ class _VoiceDashboardState extends State<VoiceDashboard>
         // Dashboard - current screen
         break;
       case 1:
-        Navigator.pushNamed(context, '/course-detail');
+        Navigator.pushNamed(context, '/course-catalog');
         break;
       case 2:
-        Navigator.pushNamed(context, '/schedule-manager');
+        Navigator.pushNamed(context, '/study-schedule');
         break;
       case 3:
         Navigator.pushNamed(context, '/progress-analytics');
         break;
       case 4:
-        // Profile - not implemented yet
+        Navigator.pushNamed(context, '/profile-settings');
         break;
     }
   }

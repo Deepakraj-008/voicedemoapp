@@ -360,28 +360,28 @@ class CustomBottomBar extends StatelessWidget {
       case 0:
         Navigator.pushNamedAndRemoveUntil(
           context,
-          '/voice-dashboard',
+          '/home-dashboard',
           (route) => false,
         );
         break;
       case 1:
         Navigator.pushNamedAndRemoveUntil(
           context,
-          '/course-detail',
+          '/course-catalog',
           (route) => false,
         );
         break;
       case 2:
         Navigator.pushNamedAndRemoveUntil(
           context,
-          '/schedule-manager',
+          '/study-schedule',
           (route) => false,
         );
         break;
       case 3:
         Navigator.pushNamedAndRemoveUntil(
           context,
-          '/progress-analytics',
+          '/profile-settings',
           (route) => false,
         );
         break;

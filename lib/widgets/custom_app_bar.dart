@@ -261,7 +261,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           color: colorScheme.onSurface,
           size: 24,
         ),
-        onPressed: () => Navigator.pushNamed(context, '/login-screen'),
+        onPressed: () => Navigator.pushNamed(context, '/profile-settings'),
         tooltip: 'Profile',
       ),
     ];

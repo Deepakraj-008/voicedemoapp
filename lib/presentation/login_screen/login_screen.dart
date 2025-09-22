@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sweetyai_learning_assistant/presentation/home_dashboard/home_dashboard.dart'
+    show HomeDashboard;
+import 'package:sweetyai_learning_assistant/presentation/voice_dashboard/voice_dashboard.dart'
+    show VoiceDashboard;
 
 import '../../core/app_export.dart';
 import '../../theme/app_theme.dart';
@@ -62,9 +66,12 @@ class _LoginScreenState extends State<LoginScreen> {
       _showSuccessMessage();
       HapticFeedback.lightImpact();
 
-      // Navigate to course catalog
+      // Navigate to voice dashboard
       Future.delayed(const Duration(milliseconds: 500), () {
-        Navigator.pushReplacementNamed(context, '/course-catalog');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => VoiceDashboard()),
+        );
       });
     } else {
       _showErrorMessage(
@@ -362,8 +369,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     SizedBox(width: 4.w),
                     BiometricLoginButton(
                       onBiometricSuccess: () {
-                        Navigator.pushReplacementNamed(
-                            context, '/course-catalog');
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => VoiceDashboard()),
+                        );
                       },
                     ),
                   ],
@@ -388,8 +398,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    TextButton(
-                      onPressed: _handleSignUp,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/registration');
+                      },
                       child: Text(
                         'Sign Up',
                         style: GoogleFonts.inter(
