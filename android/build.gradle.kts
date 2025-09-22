@@ -1,12 +1,7 @@
+// android/build.gradle.kts
 plugins {
-    id("com.android.application") version "8.5.2" apply false
-    id("com.android.library")    version "8.5.2" apply false
-    id("org.jetbrains.kotlin.android") version "1.9.24" apply false
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
+    // DO NOT put versions here; they come from settings.gradle.kts
+    id("com.android.application") apply false
+    id("com.android.library") apply false
+    id("org.jetbrains.kotlin.android") apply false
 }
