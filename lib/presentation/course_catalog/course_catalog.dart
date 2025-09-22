@@ -432,7 +432,7 @@ class _CourseCatalogState extends State<CourseCatalog>
               color: colorScheme.onSurface,
               size: 24,
             ),
-            onPressed: () => Navigator.pushNamed(context, '/login-screen'),
+            onPressed: () => Navigator.pushNamed(context, '/profile-settings'),
             tooltip: 'Profile',
           ),
         ],
@@ -490,12 +490,7 @@ class _CourseCatalogState extends State<CourseCatalog>
                               course: course,
                               onTap: () {
                                 // Navigate to course details
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("Opening ${course["title"]}"),
-                                    duration: const Duration(seconds: 1),
-                                  ),
-                                );
+                                Navigator.pushNamed(context, '/course-detail');
                               },
                               onEnroll: () => _onCourseEnroll(course),
                               onWishlist: () => _onCourseWishlist(course),

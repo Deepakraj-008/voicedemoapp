@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 import 'package:sizer/sizer.dart';
+import 'package:sweetyai_learning_assistant/presentation/login_screen/login_screen.dart'
+    show LoginScreen;
 
 import '../../core/app_export.dart';
 import './widgets/create_account_button.dart';
@@ -76,23 +78,46 @@ class _RegistrationState extends State<Registration> {
   }
 
   Future<void> _toggleVoiceInput(String fieldName) async {
-    if (_isListening) {
-      await _stopListening();
-    } else {
-      await _startListening(fieldName);
+    try {
+      if (_isListening) {
+        await _stopListening();
+      } else {
+        await _startListening(fieldName);
+      }
+    } catch (e) {
+      _showVoiceFeedback('Voice input unavailable. Please try typing instead.');
+      setState(() {
+        _isListening = false;
+        _currentListeningField = '';
+      });
     }
   }
 
   Future<void> _startListening(String fieldName) async {
     try {
-      if (await _audioRecorder.hasPermission()) {
-        setState(() {
-          _isListening = true;
-          _currentListeningField = fieldName;
-        });
+      // Check permission first
+      bool hasPermission = false;
+      try {
+        hasPermission = await _audioRecorder.hasPermission();
+      } catch (e) {
+        hasPermission = false;
+      }
 
-        _showVoiceFeedback('Listening for $fieldName. Please speak now.');
+      if (!hasPermission) {
+        _showVoiceFeedback(
+            'Microphone permission denied. Please try typing instead.');
+        return;
+      }
 
+      setState(() {
+        _isListening = true;
+        _currentListeningField = fieldName;
+      });
+
+      _showVoiceFeedback('Listening for $fieldName. Please speak now.');
+
+      // Try to start recording with error handling
+      try {
         await _audioRecorder.start(const RecordConfig(),
             path: 'temp_recording.m4a');
 
@@ -102,19 +127,36 @@ class _RegistrationState extends State<Registration> {
 
         // Mock voice input results
         final mockVoiceResults = {
-          'email': 'john.doe@example.com',
+          'email': 'lucky@example.com',
           'password': 'SecurePass123!',
           'confirmPassword': 'SecurePass123!',
-          'displayName': 'John Doe',
+          'displayName': 'Deepakraj',
         };
 
         final result = mockVoiceResults[fieldName] ?? '';
         if (result.isNotEmpty) {
           _handleVoiceInput(fieldName, result);
         }
+      } catch (e) {
+        // If recording fails, still show mock results for demo
+        await _stopListening();
+
+        // Mock voice input results for demo purposes
+        final mockVoiceResults = {
+          'email': 'lucky@example.com',
+          'password': 'SecurePass123!',
+          'confirmPassword': 'SecurePass123!',
+          'displayName': 'Deepakraj',
+        };
+
+        final result = mockVoiceResults[fieldName] ?? '';
+        if (result.isNotEmpty) {
+          _handleVoiceInput(fieldName, result);
+          _showVoiceFeedback('Voice input simulated for demo.');
+        }
       }
     } catch (e) {
-      _showVoiceFeedback('Voice input failed. Please try typing instead.');
+      _showVoiceFeedback('Voice input unavailable. Please try typing instead.');
       setState(() {
         _isListening = false;
         _currentListeningField = '';
@@ -133,6 +175,22 @@ class _RegistrationState extends State<Registration> {
       // Handle error silently
     }
   }
+
+  //  void _handleVoiceCommand(String command) {
+  //   switch (command.toLowerCase()) {
+  //     case 'go back':
+  //       Navigator.pop(context);
+  //       break;
+  //     case 'clear form':
+  //       _clearForm();
+  //       break;
+  //     case 'create account':
+  //       if (_isFormValid()) {
+  //         _createAccount();
+  //       }
+  //       break;
+  //   }
+  // }
 
   void _handleVoiceInput(String fieldName, String input) {
     switch (fieldName) {
@@ -166,22 +224,6 @@ class _RegistrationState extends State<Registration> {
         backgroundColor: AppTheme.lightTheme.colorScheme.tertiary,
       ),
     );
-  }
-
-  void _handleVoiceCommand(String command) {
-    switch (command.toLowerCase()) {
-      case 'go back':
-        Navigator.pop(context);
-        break;
-      case 'clear form':
-        _clearForm();
-        break;
-      case 'create account':
-        if (_isFormValid()) {
-          _createAccount();
-        }
-        break;
-    }
   }
 
   void _clearForm() {
@@ -470,8 +512,11 @@ class _RegistrationState extends State<Registration> {
                                 GestureDetector(
                                   onTap: () {
                                     _saveFormData();
-                                    Navigator.pushNamed(
-                                        context, '/splash-screen');
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => LoginScreen()),
+                                    );
                                   },
                                   child: Text(
                                     'Sign In',

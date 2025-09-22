@@ -752,6 +752,6 @@ You'll learn everything from basic syntax to advanced concepts like web developm
   }
 
   void _handleContinueLearning() {
-    Navigator.pushNamed(context, '/voice-dashboard');
+    Navigator.pushNamed(context, '/learning-session');
   }
 }
