@@ -4,9 +4,14 @@ import 'package:sizer/sizer.dart';
 
 import '../core/app_export.dart';
 import '../widgets/custom_error_widget.dart';
+import '../core/widgets/global_voice_assistant.dart';
+import '../core/env_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables
+  await EnvService.loadEnv();
 
   bool _hasShownError = false;
 
@@ -36,27 +41,35 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+  // Global key for navigator to be used by voice assistant
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
     return Sizer(builder: (context, orientation, screenType) {
-      return MaterialApp(
-        title: 'voicelearn_ai',
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.light,
-        // 🚨 CRITICAL: NEVER REMOVE OR MODIFY
-        builder: (context, child) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.linear(1.0),
-            ),
-            child: child!,
-          );
-        },
-        // 🚨 END CRITICAL SECTION
-        debugShowCheckedModeBanner: false,
-        routes: AppRoutes.routes,
-        initialRoute: AppRoutes.initial,
+      return GlobalVoiceAssistant(
+        navigatorKey: navigatorKey,
+        child: MaterialApp(
+          title: 'voicelearn_ai',
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.light,
+          navigatorKey: navigatorKey,
+          // 🚨 CRITICAL: NEVER REMOVE OR MODIFY
+          builder: (context, child) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: TextScaler.linear(1.0),
+              ),
+              child: child!,
+            );
+          },
+          // 🚨 END CRITICAL SECTION
+          debugShowCheckedModeBanner: false,
+          routes: AppRoutes.routes,
+          initialRoute: AppRoutes.initial,
+        ),
       );
     });
   }

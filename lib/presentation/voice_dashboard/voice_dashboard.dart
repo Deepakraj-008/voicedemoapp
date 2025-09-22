@@ -6,7 +6,7 @@ import './widgets/achievements_banner_widget.dart';
 import './widgets/continue_learning_card_widget.dart';
 import './widgets/greeting_card_widget.dart';
 import './widgets/quick_actions_widget.dart';
-import './widgets/voice_assistant_widget.dart';
+import './widgets/ai_button_widget.dart';
 
 class VoiceDashboard extends StatefulWidget {
   const VoiceDashboard({super.key});
@@ -216,7 +216,7 @@ class _VoiceDashboardState extends State<VoiceDashboard>
             color: AppTheme.lightTheme.colorScheme.primary,
           ),
         ),
-        centerTitle: false,
+        centerTitle: true,
         actions: [
           Container(
             margin: EdgeInsets.only(right: 4.w),
@@ -332,10 +332,7 @@ class _VoiceDashboardState extends State<VoiceDashboard>
               ),
             ),
           ),
-          VoiceAssistantWidget(
-            isListening: _isListening,
-            onTap: _toggleVoiceAssistant,
-          ),
+          const AIButtonWidget(),
           if (_isRefreshing)
             Container(
               color: Colors.black.withValues(alpha: 0.3),
