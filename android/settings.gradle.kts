@@ -1,14 +1,4 @@
 pluginManagement {
-    def flutterSdkPath = {
-        def properties = new Properties()
-        file("local.properties").withInputStream { properties.load(it) }
-        def flutterSdkPath = properties.getProperty("flutter.sdk")
-        assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
-        return flutterSdkPath
-    }()
-
-    includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
-
     repositories {
         google()
         mavenCentral()
@@ -16,11 +6,24 @@ pluginManagement {
     }
 }
 
-plugins {
-    id "dev.flutter.flutter-plugin-loader" version "1.0.0"
-    id "com.android.application" version "8.2.1" apply false
-    id "org.jetbrains.kotlin.android" version "1.8.22" apply false
+import java.util.Properties
+import java.io.File
+
+/**
+ * Read flutter.sdk from local.properties
+ */
+val localProps = Properties().apply {
+    val f = File(rootDir, "local.properties")
+    if (!f.exists()) {
+        throw GradleException("local.properties not found at ${f.absolutePath}")
+    }
+    f.inputStream().use { load(it) }
 }
+val flutterSdkPath = localProps.getProperty("flutter.sdk")
+    ?: throw GradleException("`flutter.sdk` not set in local.properties")
 
-include ":app"
+// Let Flutter inject its Gradle logic
+includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
+// Your Android app module
+include(":app")
