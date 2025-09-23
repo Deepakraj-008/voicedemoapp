@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../urls.dart';
+import 'package:sweetyai_learning_assistant/widgets/urls.dart' show URLS;
 
 class AIService {
   // Get trending AI models from Hugging Face

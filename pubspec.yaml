@@ -31,6 +31,8 @@ dependencies:
   video_player: ^2.10.0
   flutter_code_editor: ^0.3.4
   table_calendar: ^3.0.9
+  provider: ^6.1.1
+  flutter_riverpod: ^2.4.9
 
   webview_flutter: ^4.13.0
   local_auth: ^2.1.6
@@ -47,4 +49,5 @@ flutter:
   assets:
     - assets/
     - assets/images/
+    - assets/crex/
     - env.json

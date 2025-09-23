@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sweetyai_learning_assistant/presentation/course_details/course_details.dart' show CourseDetail;
+import 'package:sweetyai_learning_assistant/presentation/crex/crex_hub_screen.dart' show CrexHubScreen;
+import 'package:sweetyai_learning_assistant/presentation/crex/match_detail_screen.dart' show CrexMatchDetailScreen;
+import 'package:sweetyai_learning_assistant/presentation/crex/series_screen.dart' show CrexSeriesScreen;
 import '../presentation/progress_analytics/progress_analytics.dart';
 import '../presentation/registration/registration.dart';
 import '../presentation/splash_screen/splash_screen.dart';
@@ -40,6 +43,11 @@ class AppRoutes {
   static const String login = '/login-screen';
   static const String courseCatalog = '/course-catalog';
 
+  static const String crex = '/crex';
+  static const String crexMatch = '/crex/match';
+  static const String crexSeries = '/crex/series';
+
+
   static Map<String, WidgetBuilder> routes = {
     initial: (context) => const SplashScreen(),
      voiceOnboarding: (context) => const VoiceOnboarding(),
@@ -57,7 +65,22 @@ class AppRoutes {
     voiceDashboard: (context) => const VoiceDashboard(),
     scheduleManager: (context) => const ScheduleManager(),
     courseDetail: (context) => const CourseDetail(),
+
+crex: (context) => const CrexHubScreen(),
+    // Detail routes get args via ModalRoute
+    crexMatch: (context) {
+      final args = ModalRoute.of(context)!.settings.arguments as String;
+      return CrexMatchDetailScreen(matchId: args);
+    },
+    crexSeries: (context) {
+      final args = ModalRoute.of(context)!.settings.arguments as String;
+      return CrexSeriesScreen(seriesKey: args);
+    },
+
+
     // TODO: Add your other routes here
   };
 }
+
+
 

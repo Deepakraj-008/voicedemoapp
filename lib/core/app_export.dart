@@ -4,3 +4,6 @@ export '../widgets/custom_image_widget.dart';
 export '../theme/app_theme.dart';
 export 'package:connectivity_plus/connectivity_plus.dart';
 export 'env_service.dart';
+export 'app_providers.dart';
+export 'constants.dart';
+export '../modules/crex/logic/match_providers.dart';

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="200" fill="#1e293b"/>
+  
+  <!-- Gradient overlay -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#0d9488;stop-opacity:0.8" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="400" height="200" fill="url(#gradient)"/>
+  
+  <!-- Cricket elements -->
+  <circle cx="50" cy="50" r="20" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.3"/>
+  <circle cx="350" cy="150" r="15" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.2"/>
+  
+  <!-- Cricket bat -->
+  <rect x="80" y="140" width="60" height="8" fill="#8b4513" rx="4"/>
+  <rect x="135" y="135" width="15" height="18" fill="#ffffff" rx="2"/>
+  
+  <!-- Cricket ball -->
+  <circle cx="320" cy="60" r="12" fill="#ffffff"/>
+  <path d="M 308 60 Q 320 48 332 60" fill="none" stroke="#8b0000" stroke-width="1"/>
+  <path d="M 308 60 Q 320 72 332 60" fill="none" stroke="#8b0000" stroke-width="1"/>
+  
+  <!-- Text -->
+  <text x="200" y="100" text-anchor="middle" fill="#ffffff" font-size="28" font-weight="bold" font-family="Arial, sans-serif">
+    Asia Cup 2024
+  </text>
+  <text x="200" y="130" text-anchor="middle" fill="#e2e8f0" font-size="16" font-family="Arial, sans-serif">
+    Live Cricket Action
+  </text>
+  
+  <!-- Decorative elements -->
+  <rect x="0" y="0" width="400" height="4" fill="#0ea5e9"/>
+  <rect x="0" y="196" width="400" height="4" fill="#0d9488"/>
+</svg>

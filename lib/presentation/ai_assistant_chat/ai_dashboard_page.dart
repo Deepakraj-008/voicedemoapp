@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../network/services/ai_service.dart';
+import 'package:sweetyai_learning_assistant/core/services/ai_service.dart' show AIService;
 
 class AIDashboardPage extends StatefulWidget {
   const AIDashboardPage({Key? key}) : super(key: key);

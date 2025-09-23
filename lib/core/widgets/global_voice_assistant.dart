@@ -115,7 +115,40 @@ class _GlobalVoiceAssistantState extends State<GlobalVoiceAssistant> {
       alignment: Alignment.topLeft,
       children: [
         widget.child,
-
+        // Voice Assistant Floating Button
+        Positioned(
+          right: 6.w,
+          bottom: 20.h,
+          child: GestureDetector(
+            onTap: _toggleVoiceAssistant,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: _isVoiceAssistantActive ? 18.w : 14.w,
+              height: _isVoiceAssistantActive ? 18.w : 14.w,
+              decoration: BoxDecoration(
+                color: _isVoiceAssistantActive
+                    ? Colors.green.withValues(alpha: 0.9)
+                    : Colors.blue.withValues(alpha: 0.9),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Icon(
+                  _isListening ? Icons.mic : Icons.mic_none,
+                  size: _isVoiceAssistantActive ? 8.w : 6.w,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ),
         // Listening Indicator
         if (_isListening)
           Positioned(
