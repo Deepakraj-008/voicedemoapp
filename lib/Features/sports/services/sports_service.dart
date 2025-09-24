@@ -378,6 +378,112 @@ class SportsService {
     }
   }
 
+  /// Fetch recent matches
+  Future<List<SportsMatch>> fetchRecentMatches({
+    String sport = 'all',
+    int limit = 20,
+  }) async {
+    try {
+      final url = Uri.parse(URLS.recentMatches(sport: sport, limit: limit));
+
+      final response = await _httpClient.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final matches = (data['matches'] as List<dynamic>?)
+                ?.map((match) => SportsMatch.fromJson(match))
+                .toList() ??
+            [];
+
+        return matches.take(limit).toList();
+      } else {
+        throw Exception(
+            'Failed to fetch recent matches: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error fetching recent matches: $e');
+      rethrow;
+    }
+  }
+
+  /// Fetch sports categories
+  Future<List<String>> fetchSportsCategories() async {
+    try {
+      final url = Uri.parse(URLS.sportsCategories);
+
+      final response = await _httpClient.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final categories = (data['categories'] as List<dynamic>?)
+                ?.map((c) => c.toString())
+                .toList() ??
+            [];
+        return categories;
+      } else {
+        throw Exception(
+            'Failed to fetch sports categories: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error fetching sports categories: $e');
+      rethrow;
+    }
+  }
+
+  /// Fetch sports standings (generic)
+  Future<List<dynamic>> fetchSportsStandings({String tournamentId = ''}) async {
+    try {
+      final path = tournamentId.isNotEmpty
+          ? URLS.tournamentStandings(tournamentId)
+          : '${URLS.sportsBase}/standings/';
+      final url = Uri.parse(URLS.buildUrl(path));
+
+      final response = await _httpClient.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['standings'] as List<dynamic>? ?? [];
+      } else {
+        throw Exception(
+            'Failed to fetch sports standings: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error fetching sports standings: $e');
+      rethrow;
+    }
+  }
+
+  /// Convenience wrappers to match provider API
+  Future<SportsMatch> getMatchDetails(String matchId) async {
+    return fetchMatchDetails(matchId);
+  }
+
+  Future<SportsScore> getMatchScorecard(String matchId) async {
+    return fetchLiveScorecard(matchId);
+  }
+
+  Future<List<SportsEvent>> getMatchCommentary(String matchId) async {
+    return fetchMatchCommentary(matchId);
+  }
+
   /// Connect to live matches WebSocket for real-time updates
   void connectToLiveMatches({String sport = 'all'}) {
     try {

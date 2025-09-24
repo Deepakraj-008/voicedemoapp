@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vector_math/vector_math.dart' as vector;
-import 'dart:math' as math;
-import 'dart:ui' as ui;
+// removed unused imports
 import '../models/sports_match_model.dart';
 import 'sports_live_indicator.dart';
 import 'sports_score_widget.dart';
@@ -38,7 +36,7 @@ class _Sports3DCardState extends State<Sports3DCard>
   late AnimationController _hoverController;
   late Animation<double> _hoverAnimation;
   late Animation<double> _glowAnimation;
-  late Animation<double> _pulseAnimation;
+  // pulse animation removed because it's currently unused
 
   double _localRotationX = 0.0;
   double _localRotationY = 0.0;
@@ -66,13 +64,6 @@ class _Sports3DCardState extends State<Sports3DCard>
       CurvedAnimation(
         parent: widget.animationController,
         curve: Curves.easeInOut,
-      ),
-    );
-
-    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(
-        parent: widget.animationController,
-        curve: Curves.easeInOutSine,
       ),
     );
   }
@@ -183,8 +174,10 @@ class _Sports3DCardState extends State<Sports3DCard>
           builder: (context, child) {
             final totalRotationX = widget.rotationX + _localRotationX;
             final totalRotationY = widget.rotationY + _localRotationY;
+            final pressFactor = _isPressed ? 0.95 : 1.0;
             final totalScale = widget.scale *
                 _localScale *
+                pressFactor *
                 (1.0 + _hoverAnimation.value * 0.1);
 
             return Transform(
@@ -319,6 +312,19 @@ class _Sports3DCardState extends State<Sports3DCard>
   }
 
   Widget _buildFullContent(IconData sportIcon, Color sportColor) {
+    final team1Name =
+        widget.match.teams.isNotEmpty ? widget.match.teams[0].name : '';
+    final team2Name =
+        widget.match.teams.length > 1 ? widget.match.teams[1].name : '';
+    final team1Logo =
+        widget.match.teams.isNotEmpty ? widget.match.teams[0].logo : '';
+    final team2Logo =
+        widget.match.teams.length > 1 ? widget.match.teams[1].logo : '';
+    final team1ScoreStr =
+        widget.match.currentScore?.team1Score['runs']?.toString() ?? '';
+    final team2ScoreStr =
+        widget.match.currentScore?.team2Score['runs']?.toString() ?? '';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -381,9 +387,9 @@ class _Sports3DCardState extends State<Sports3DCard>
           children: [
             Expanded(
               child: _buildTeamInfo(
-                widget.match.team1,
-                widget.match.team1Score,
-                widget.match.team1Logo,
+                team1Name,
+                team1ScoreStr,
+                team1Logo,
               ),
             ),
             const Padding(
@@ -399,9 +405,9 @@ class _Sports3DCardState extends State<Sports3DCard>
             ),
             Expanded(
               child: _buildTeamInfo(
-                widget.match.team2,
-                widget.match.team2Score,
-                widget.match.team2Logo,
+                team2Name,
+                team2ScoreStr,
+                team2Logo,
                 isRightAligned: true,
               ),
             ),
@@ -431,7 +437,7 @@ class _Sports3DCardState extends State<Sports3DCard>
               ),
             ),
             Text(
-              widget.match.startTime,
+              widget.match.startTime.toLocal().toString().split('.').first,
               style: TextStyle(
                 color: Colors.grey.shade400,
                 fontSize: 12,
@@ -439,8 +445,7 @@ class _Sports3DCardState extends State<Sports3DCard>
             ),
           ],
         ),
-
-        if (widget.match.result.isNotEmpty) ...[
+        if (widget.match.result?.isNotEmpty ?? false) ...[
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(8),
@@ -453,7 +458,7 @@ class _Sports3DCardState extends State<Sports3DCard>
               ),
             ),
             child: Text(
-              widget.match.result,
+              widget.match.result ?? '',
               style: TextStyle(
                 color: sportColor.withOpacity(0.9),
                 fontSize: 11,
@@ -469,15 +474,27 @@ class _Sports3DCardState extends State<Sports3DCard>
   }
 
   Widget _buildCompactContent(IconData sportIcon, Color sportColor) {
+    final team1Name =
+        widget.match.teams.isNotEmpty ? widget.match.teams[0].name : '';
+    final team2Name =
+        widget.match.teams.length > 1 ? widget.match.teams[1].name : '';
+    final team1Logo =
+        widget.match.teams.isNotEmpty ? widget.match.teams[0].logo : '';
+    final team2Logo =
+        widget.match.teams.length > 1 ? widget.match.teams[1].logo : '';
+    final scoreLine = widget.match.currentScore != null
+        ? '${widget.match.currentScore!.team1Score['runs'] ?? ''} - ${widget.match.currentScore!.team2Score['runs'] ?? ''}'
+        : '';
+
     return Row(
       children: [
         // Team 1
         Expanded(
           child: Row(
             children: [
-              if (widget.match.team1Logo.isNotEmpty)
+              if (team1Logo.isNotEmpty)
                 CircleAvatar(
-                  backgroundImage: NetworkImage(widget.match.team1Logo),
+                  backgroundImage: NetworkImage(team1Logo),
                   radius: 16,
                   backgroundColor: sportColor.withOpacity(0.2),
                 )
@@ -494,7 +511,7 @@ class _Sports3DCardState extends State<Sports3DCard>
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  widget.match.team1,
+                  team1Name,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -516,16 +533,17 @@ class _Sports3DCardState extends State<Sports3DCard>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      '${widget.match.team1Score} - ${widget.match.team2Score}',
+                      scoreLine.isNotEmpty ? scoreLine : 'VS',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (widget.match.currentInning.isNotEmpty)
+                    if ((widget.match.currentScore?.currentInning ?? '')
+                        .isNotEmpty)
                       Text(
-                        widget.match.currentInning,
+                        widget.match.currentScore?.currentInning ?? '',
                         style: TextStyle(
                           color: Colors.grey.shade400,
                           fontSize: 10,
@@ -550,7 +568,7 @@ class _Sports3DCardState extends State<Sports3DCard>
             children: [
               Expanded(
                 child: Text(
-                  widget.match.team2,
+                  team2Name,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -562,9 +580,9 @@ class _Sports3DCardState extends State<Sports3DCard>
                 ),
               ),
               const SizedBox(width: 8),
-              if (widget.match.team2Logo.isNotEmpty)
+              if (team2Logo.isNotEmpty)
                 CircleAvatar(
-                  backgroundImage: NetworkImage(widget.match.team2Logo),
+                  backgroundImage: NetworkImage(team2Logo),
                   radius: 16,
                   backgroundColor: sportColor.withOpacity(0.2),
                 )
@@ -700,7 +718,7 @@ class SportsCardBackgroundPainter extends CustomPainter {
 }
 
 /// Additional card widgets for different match states
-class SportsScheduleCard extends StatelessWidget {
+class SportsScheduleCard extends StatefulWidget {
   final SportsMatch match;
   final VoidCallback onTap;
 
@@ -711,20 +729,40 @@ class SportsScheduleCard extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<SportsScheduleCard> createState() => _SportsScheduleCardState();
+}
+
+class _SportsScheduleCardState extends State<SportsScheduleCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Sports3DCard(
-      match: match,
-      onTap: onTap,
-      animationController: AnimationController(
-        duration: const Duration(milliseconds: 1000),
-        vsync: Navigator.of(context).context as TickerProvider,
-      )..forward(),
+      match: widget.match,
+      onTap: widget.onTap,
+      animationController: _controller,
       showDetails: false,
     );
   }
 }
 
-class SportsResultCard extends StatelessWidget {
+class SportsResultCard extends StatefulWidget {
   final SportsMatch match;
   final VoidCallback onTap;
 
@@ -735,14 +773,34 @@ class SportsResultCard extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<SportsResultCard> createState() => _SportsResultCardState();
+}
+
+class _SportsResultCardState extends State<SportsResultCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Sports3DCard(
-      match: match,
-      onTap: onTap,
-      animationController: AnimationController(
-        duration: const Duration(milliseconds: 1000),
-        vsync: Navigator.of(context).context as TickerProvider,
-      )..forward(),
+      match: widget.match,
+      onTap: widget.onTap,
+      animationController: _controller,
       showDetails: true,
     );
   }

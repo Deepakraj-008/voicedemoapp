@@ -62,7 +62,7 @@ final websocketStateProvider = StateProvider<WebsocketState>((ref) {
 });
 
 /// Provider for real-time match updates
-final matchUpdatesProvider = StreamProvider<Map<String, dynamic>>((ref) {
+final matchUpdatesProvider = StreamProvider<SportsMatch>((ref) {
   final sportsService = ref.read(sportsServiceProvider);
   return sportsService.matchUpdatesStream;
 });
@@ -112,7 +112,7 @@ class SportsNotifier extends StateNotifier<SportsState> {
     try {
       state = state.copyWith(isLoadingLiveMatches: true, error: null);
 
-      final matches = await _sportsService.getLiveMatches();
+      final matches = await _sportsService.fetchLiveMatches();
 
       state = state.copyWith(
         liveMatches: matches,
@@ -133,7 +133,7 @@ class SportsNotifier extends StateNotifier<SportsState> {
     try {
       state = state.copyWith(isLoadingUpcomingMatches: true, error: null);
 
-      final matches = await _sportsService.getUpcomingMatches();
+      final matches = await _sportsService.fetchUpcomingMatches();
 
       state = state.copyWith(
         upcomingMatches: matches,
@@ -154,7 +154,7 @@ class SportsNotifier extends StateNotifier<SportsState> {
     try {
       state = state.copyWith(isLoadingRecentMatches: true, error: null);
 
-      final matches = await _sportsService.getRecentMatches();
+      final matches = await _sportsService.fetchRecentMatches();
 
       state = state.copyWith(
         recentMatches: matches,
@@ -173,7 +173,7 @@ class SportsNotifier extends StateNotifier<SportsState> {
   /// Load sports categories
   Future<void> loadSportsCategories() async {
     try {
-      final categories = await _sportsService.getSportsCategories();
+      final categories = await _sportsService.fetchSportsCategories();
 
       state = state.copyWith(
         sportsCategories: ['all', ...categories],
@@ -191,7 +191,7 @@ class SportsNotifier extends StateNotifier<SportsState> {
     try {
       state = state.copyWith(isLoadingNews: true, error: null);
 
-      final news = await _sportsService.getSportsNews();
+      final news = await _sportsService.fetchSportsNews();
 
       state = state.copyWith(
         sportsNews: news,
@@ -211,7 +211,7 @@ class SportsNotifier extends StateNotifier<SportsState> {
     try {
       state = state.copyWith(isLoadingStandings: true, error: null);
 
-      final standings = await _sportsService.getSportsStandings();
+      final standings = await _sportsService.fetchSportsStandings();
 
       state = state.copyWith(
         sportsStandings: standings,
@@ -311,29 +311,29 @@ class SportsNotifier extends StateNotifier<SportsState> {
 
     // Search live matches
     var filteredLive = state.liveMatches.where((match) {
-      return match.title.toLowerCase().contains(searchQuery) ||
-          match.team1.toLowerCase().contains(searchQuery) ||
-          match.team2.toLowerCase().contains(searchQuery) ||
+      return match.tournament.toLowerCase().contains(searchQuery) ||
+          match.teams
+              .any((team) => team.name.toLowerCase().contains(searchQuery)) ||
           match.venue.toLowerCase().contains(searchQuery) ||
-          match.seriesName.toLowerCase().contains(searchQuery);
+          match.league.toLowerCase().contains(searchQuery);
     }).toList();
 
     // Search upcoming matches
     var filteredUpcoming = state.upcomingMatches.where((match) {
-      return match.title.toLowerCase().contains(searchQuery) ||
-          match.team1.toLowerCase().contains(searchQuery) ||
-          match.team2.toLowerCase().contains(searchQuery) ||
+      return match.tournament.toLowerCase().contains(searchQuery) ||
+          match.teams
+              .any((team) => team.name.toLowerCase().contains(searchQuery)) ||
           match.venue.toLowerCase().contains(searchQuery) ||
-          match.seriesName.toLowerCase().contains(searchQuery);
+          match.league.toLowerCase().contains(searchQuery);
     }).toList();
 
     // Search recent matches
     var filteredRecent = state.recentMatches.where((match) {
-      return match.title.toLowerCase().contains(searchQuery) ||
-          match.team1.toLowerCase().contains(searchQuery) ||
-          match.team2.toLowerCase().contains(searchQuery) ||
+      return match.tournament.toLowerCase().contains(searchQuery) ||
+          match.teams
+              .any((team) => team.name.toLowerCase().contains(searchQuery)) ||
           match.venue.toLowerCase().contains(searchQuery) ||
-          match.seriesName.toLowerCase().contains(searchQuery);
+          match.league.toLowerCase().contains(searchQuery);
     }).toList();
 
     state = state.copyWith(
@@ -348,11 +348,10 @@ class SportsNotifier extends StateNotifier<SportsState> {
     try {
       state = state.copyWith(websocketState: WebsocketState.connecting);
 
-      _webSocketChannel = await _sportsService.connectToMatchUpdates();
-
-      _webSocketChannel!.stream.listen(
-        (message) {
-          _handleWebSocketMessage(message);
+      // Listen to match updates stream
+      _sportsService.matchUpdatesStream.listen(
+        (match) {
+          _handleMatchUpdate(match);
         },
         onError: (error) {
           state = state.copyWith(
@@ -361,9 +360,18 @@ class SportsNotifier extends StateNotifier<SportsState> {
           );
           _scheduleWebSocketReconnect();
         },
-        onDone: () {
-          state = state.copyWith(websocketState: WebsocketState.disconnected);
-          _scheduleWebSocketReconnect();
+      );
+
+      // Listen to score updates stream
+      _sportsService.scoreUpdatesStream.listen(
+        (score) {
+          _handleScoreUpdate(score);
+        },
+        onError: (error) {
+          state = state.copyWith(
+            websocketState: WebsocketState.error,
+            error: 'WebSocket error: $error',
+          );
         },
       );
 
@@ -371,45 +379,26 @@ class SportsNotifier extends StateNotifier<SportsState> {
     } catch (e) {
       state = state.copyWith(
         websocketState: WebsocketState.error,
-        error: 'Failed to connect WebSocket: $e',
+        error: 'Failed to connect to WebSocket: $e',
       );
       _scheduleWebSocketReconnect();
     }
   }
 
-  /// Handle WebSocket messages
-  void _handleWebSocketMessage(String message) {
-    try {
-      final data = json.decode(message);
-
-      if (data['type'] == 'match_update') {
-        _updateMatchFromWebSocket(data['match']);
-      } else if (data['type'] == 'score_update') {
-        _updateMatchScore(data);
-      } else if (data['type'] == 'match_alert') {
-        _handleMatchAlert(data);
-      }
-    } catch (e) {
-      print('Error handling WebSocket message: $e');
-    }
-  }
-
-  /// Update match data from WebSocket
-  void _updateMatchFromWebSocket(Map<String, dynamic> matchData) {
-    final matchId = matchData['id'];
-
+  /// Handle match updates from stream
+  void _handleMatchUpdate(SportsMatch updatedMatch) {
     // Update in live matches
     final updatedLiveMatches = state.liveMatches.map((match) {
-      if (match.id == matchId) {
-        return SportsMatch.fromJson(matchData);
+      if (match.id == updatedMatch.id) {
+        return updatedMatch;
       }
       return match;
     }).toList();
 
     // Update in filtered live matches
     final updatedFilteredLiveMatches = state.filteredLiveMatches.map((match) {
-      if (match.id == matchId) {
-        return SportsMatch.fromJson(matchData);
+      if (match.id == updatedMatch.id) {
+        return updatedMatch;
       }
       return match;
     }).toList();
@@ -421,33 +410,20 @@ class SportsNotifier extends StateNotifier<SportsState> {
     );
   }
 
-  /// Update match score
-  void _updateMatchScore(Map<String, dynamic> scoreData) {
-    final matchId = scoreData['match_id'];
-    final team1Score = scoreData['team1_score'];
-    final team2Score = scoreData['team2_score'];
-    final currentInning = scoreData['current_inning'] ?? '';
-
+  /// Handle score updates from stream
+  void _handleScoreUpdate(SportsScore updatedScore) {
     // Update in live matches
     final updatedLiveMatches = state.liveMatches.map((match) {
-      if (match.id == matchId) {
-        return match.copyWith(
-          team1Score: team1Score,
-          team2Score: team2Score,
-          currentInning: currentInning,
-        );
+      if (match.id == updatedScore.matchId) {
+        return match.copyWith(currentScore: updatedScore);
       }
       return match;
     }).toList();
 
     // Update in filtered live matches
     final updatedFilteredLiveMatches = state.filteredLiveMatches.map((match) {
-      if (match.id == matchId) {
-        return match.copyWith(
-          team1Score: team1Score,
-          team2Score: team2Score,
-          currentInning: currentInning,
-        );
+      if (match.id == updatedScore.matchId) {
+        return match.copyWith(currentScore: updatedScore);
       }
       return match;
     }).toList();
@@ -457,6 +433,11 @@ class SportsNotifier extends StateNotifier<SportsState> {
       filteredLiveMatches: updatedFilteredLiveMatches,
       lastUpdated: DateTime.now(),
     );
+  }
+
+  /// Handle match alerts
+  void handleMatchAlert(Map<String, dynamic> alertData) {
+    _handleMatchAlert(alertData);
   }
 
   /// Handle match alerts
@@ -548,7 +529,7 @@ class SportsNotifier extends StateNotifier<SportsState> {
   }
 
   /// Get match scorecard
-  Future<Map<String, dynamic>?> getMatchScorecard(String matchId) async {
+  Future<SportsScore?> getMatchScorecard(String matchId) async {
     try {
       return await _sportsService.getMatchScorecard(matchId);
     } catch (e) {

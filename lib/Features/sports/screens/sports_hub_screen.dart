@@ -1,21 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
+// removed unused provider import
+import 'dart:math' as math;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:animations/animations.dart';
-import 'package:vector_math/vector_math.dart' as vector;
 import '../widgets/sports_3d_card.dart';
-import '../widgets/sports_live_indicator.dart';
-import '../widgets/sports_score_widget.dart';
-import '../widgets/sports_filter_chips.dart';
-import '../widgets/sports_search_bar.dart';
 import '../providers/sports_providers.dart';
 import '../models/sports_match_model.dart';
-import 'sports_match_detail_screen.dart';
-import 'sports_live_screen.dart';
-import 'sports_schedule_screen.dart';
-import 'sports_news_screen.dart';
-import 'sports_standings_screen.dart';
+
+// Placeholder screens used by navigation. If you have real screens elsewhere,
+// you can remove these placeholders.
+class SportsMatchDetailScreen extends StatelessWidget {
+  final SportsMatch match;
+  const SportsMatchDetailScreen({Key? key, required this.match})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(match.matchTitle)),
+      body: Center(child: Text('Match details for ${match.matchTitle}')),
+    );
+  }
+}
+
+class SportsLiveScreen extends StatelessWidget {
+  const SportsLiveScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Live Stream')),
+      body: const Center(child: Text('Live streaming coming soon')),
+    );
+  }
+}
 
 /// Main sports hub screen with 3D animations and comprehensive sports features
 /// Replaces the old crex functionality with enhanced multi-sport support
@@ -32,6 +50,7 @@ class _SportsHubScreenState extends ConsumerState<SportsHubScreen>
   late AnimationController _animationController;
   late AnimationController _3dAnimationController;
   late ScrollController _scrollController;
+  late TextEditingController _searchController;
 
   int _selectedTab = 0;
   String _selectedSport = 'all';
@@ -62,6 +81,7 @@ class _SportsHubScreenState extends ConsumerState<SportsHubScreen>
     )..repeat(reverse: true);
 
     _scrollController = ScrollController();
+    _searchController = TextEditingController(text: _searchQuery);
 
     // Initialize sports data
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -78,15 +98,16 @@ class _SportsHubScreenState extends ConsumerState<SportsHubScreen>
     _animationController.dispose();
     _3dAnimationController.dispose();
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   Future<void> _loadInitialData() async {
-    final sportsProvider = ref.read(sportsProvider.notifier);
-    await sportsProvider.loadLiveMatches();
-    await sportsProvider.loadUpcomingMatches();
-    await sportsProvider.loadRecentMatches();
-    await sportsProvider.loadSportsCategories();
+    final sportsNotifier = ref.read(sportsProvider.notifier);
+    await sportsNotifier.loadLiveMatches();
+    await sportsNotifier.loadUpcomingMatches();
+    await sportsNotifier.loadRecentMatches();
+    await sportsNotifier.loadSportsCategories();
   }
 
   void _handleSportSelection(String sport) {
@@ -137,11 +158,13 @@ class _SportsHubScreenState extends ConsumerState<SportsHubScreen>
         pageBuilder: (context, animation, secondaryAnimation) =>
             SportsMatchDetailScreen(match: match),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SharedAxisTransition(
-            animation: animation,
-            secondaryAnimation: secondaryAnimation,
-            transitionType: SharedAxisTransitionType.horizontal,
-            child: child,
+          final offset = Tween<Offset>(
+                  begin: const Offset(1, 0), end: Offset.zero)
+              .animate(
+                  CurvedAnimation(parent: animation, curve: Curves.easeInOut));
+          return SlideTransition(
+            position: offset,
+            child: FadeTransition(opacity: animation, child: child),
           );
         },
         transitionDuration: const Duration(milliseconds: 500),
@@ -235,15 +258,36 @@ class _SportsHubScreenState extends ConsumerState<SportsHubScreen>
                   child: child,
                 );
               },
-              child: const Text(
-                'SPORTS ARENA',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2,
-                ),
-              ),
+              child: _isSearching
+                  ? SizedBox(
+                      height: 40,
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: _handleSearch,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: 'Search matches...',
+                          hintStyle: TextStyle(color: Colors.grey.shade500),
+                          filled: true,
+                          fillColor: Colors.black.withOpacity(0.3),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide.none,
+                          ),
+                          prefixIcon:
+                              const Icon(Icons.search, color: Colors.white),
+                        ),
+                      ),
+                    )
+                  : const Text(
+                      'SPORTS ARENA',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
+                      ),
+                    ),
             ),
             const SizedBox(height: 4),
             const Text(
@@ -254,6 +298,47 @@ class _SportsHubScreenState extends ConsumerState<SportsHubScreen>
                 fontWeight: FontWeight.w300,
               ),
             ),
+            if (_showFilters) ...[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: [
+                  ChoiceChip(
+                    label: const Text('All'),
+                    selected: _selectedSport == 'all',
+                    onSelected: (_) => _handleSportSelection('all'),
+                  ),
+                  ChoiceChip(
+                    label: const Text('Cricket'),
+                    selected: _selectedSport == 'cricket',
+                    onSelected: (_) => _handleSportSelection('cricket'),
+                  ),
+                  ChoiceChip(
+                    label: const Text('Football'),
+                    selected: _selectedSport == 'football',
+                    onSelected: (_) => _handleSportSelection('football'),
+                  ),
+                  ChoiceChip(
+                    label: const Text('T20'),
+                    selected: _selectedFormat == 'T20',
+                    onSelected: (_) => _handleFormatSelection('T20'),
+                  ),
+                  DropdownButton<String>(
+                    value: _selectedPriority,
+                    dropdownColor: Colors.black,
+                    items: const [
+                      DropdownMenuItem(value: 'all', child: Text('All')),
+                      DropdownMenuItem(value: 'high', child: Text('High')),
+                      DropdownMenuItem(value: 'medium', child: Text('Medium')),
+                      DropdownMenuItem(value: 'low', child: Text('Low')),
+                    ],
+                    onChanged: (v) {
+                      if (v != null) _handlePrioritySelection(v);
+                    },
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
         background: Container(

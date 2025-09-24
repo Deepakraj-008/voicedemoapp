@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:3000/api';
+  static const String baseUrl = 'http://127.0.0.1:8003/api';
   static final Dio _dio = Dio(
     BaseOptions(
       baseUrl: baseUrl,
@@ -31,14 +31,16 @@ class ApiService {
         },
         onResponse: (response, handler) {
           if (kDebugMode) {
-            print('RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
+            print(
+                'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
             print('RESPONSE DATA: ${response.data}');
           }
           return handler.next(response);
         },
         onError: (DioException error, handler) {
           if (kDebugMode) {
-            print('ERROR[${error.response?.statusCode}] => PATH: ${error.requestOptions.path}');
+            print(
+                'ERROR[${error.response?.statusCode}] => PATH: ${error.requestOptions.path}');
             print('ERROR MESSAGE: ${error.message}');
           }
           return handler.next(error);
@@ -63,7 +65,7 @@ class ApiService {
         'first_name': firstName,
         'last_name': lastName,
       });
-      
+
       if (response.data['success'] == true) {
         return response.data['user'];
       } else {
@@ -83,7 +85,7 @@ class ApiService {
         'username': username,
         'password': password,
       });
-      
+
       if (response.data['success'] == true) {
         // Store the token for future requests
         final token = response.data['access'];
@@ -112,7 +114,7 @@ class ApiService {
         if (category != null) 'category': category,
         if (level != null) 'level': level,
       });
-      
+
       if (response.data['success'] == true) {
         return response.data['results'];
       } else {
@@ -126,11 +128,12 @@ class ApiService {
   static Future<Map<String, dynamic>> getCourseDetail(int id) async {
     try {
       final response = await _dio.get('/courses/$id');
-      
+
       if (response.data['success'] == true) {
         return response.data['course'];
       } else {
-        throw Exception(response.data['error'] ?? 'Failed to fetch course detail');
+        throw Exception(
+            response.data['error'] ?? 'Failed to fetch course detail');
       }
     } on DioException catch (e) {
       throw Exception(_handleError(e));
@@ -147,7 +150,7 @@ class ApiService {
         if (courseId != null) 'course_id': courseId,
         if (status != null) 'status': status,
       });
-      
+
       if (response.data['success'] == true) {
         return response.data['results'];
       } else {
@@ -158,12 +161,13 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> submitExam(int id, List<dynamic> answers) async {
+  static Future<Map<String, dynamic>> submitExam(
+      int id, List<dynamic> answers) async {
     try {
       final response = await _dio.post('/exams/$id/submit', data: {
         'answers': answers,
       });
-      
+
       if (response.data['success'] == true) {
         return response.data['result'];
       } else {
@@ -184,7 +188,7 @@ class ApiService {
         if (courseId != null) 'course_id': courseId,
         if (category != null) 'category': category,
       });
-      
+
       if (response.data['success'] == true) {
         return response.data['results'];
       } else {
@@ -195,12 +199,13 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> reviewFlashcard(int id, String difficulty) async {
+  static Future<Map<String, dynamic>> reviewFlashcard(
+      int id, String difficulty) async {
     try {
       final response = await _dio.post('/flashcards/$id/review', data: {
         'difficulty': difficulty,
       });
-      
+
       if (response.data['success'] == true) {
         return response.data['review'];
       } else {
@@ -223,7 +228,7 @@ class ApiService {
         'amount': amount,
         'currency': currency,
       });
-      
+
       if (response.data['success'] == true) {
         return response.data['payment'];
       } else {
@@ -239,7 +244,7 @@ class ApiService {
       final response = await _dio.post('/payments/verify', data: {
         'payment_id': paymentId,
       });
-      
+
       if (response.data['success'] == true) {
         return response.data['verification'];
       } else {
@@ -264,7 +269,7 @@ class ApiService {
         'comment': comment,
         'type': type,
       });
-      
+
       if (response.data['success'] == true) {
         return response.data['feedback'];
       } else {
@@ -280,7 +285,7 @@ class ApiService {
       final response = await _dio.get('/feedback', queryParameters: {
         if (courseId != null) 'course_id': courseId,
       });
-      
+
       if (response.data['success'] == true) {
         return {
           'count': response.data['count'],
@@ -299,7 +304,7 @@ class ApiService {
   static Future<List<dynamic>> getLiveDataCategories() async {
     try {
       final response = await _dio.get('/live-data/categories');
-      
+
       if (response.data['success'] == true) {
         return response.data['categories'];
       } else {
@@ -313,7 +318,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getLiveData(String category) async {
     try {
       final response = await _dio.get('/live-data/$category');
-      
+
       if (response.data['success'] == true) {
         return response.data;
       } else {
@@ -384,7 +389,7 @@ class ApiService {
     if (error.response != null) {
       final statusCode = error.response?.statusCode;
       final data = error.response?.data;
-      
+
       if (data != null && data is Map && data.containsKey('error')) {
         return data['error'];
       } else if (statusCode == 400) {
@@ -397,7 +402,7 @@ class ApiService {
         return 'Server error. Please try again later.';
       }
     }
-    
+
     return 'Network error. Please check your connection.';
   }
 
@@ -468,187 +473,261 @@ class _ExampleUsageState extends State<ExampleUsage> {
   }
 }
 */
+final Dio _dio = Dio(
+  BaseOptions(
+    baseUrl: 'http://127.0.0.1:8003/api',
+    connectTimeout: const Duration(seconds: 30),
+    receiveTimeout: const Duration(seconds: 30),
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+  ),
+);
+void setAuthToken(String token) {
+  _dio.options.headers['Authorization'] = 'Bearer $token';
+}
 
+Map<String, dynamic> _handleError(dynamic error) {
+  if (error is DioException) {
+    if (error.response != null) {
+      final statusCode = error.response?.statusCode;
+      final data = error.response?.data;
 
-// // Login with Token (JWT)
-//  Future<Map<String, dynamic>> loginWithToken({
-// required String email,
-// required String password,
-// }) async {
-// try {
-// final response = await _dio.post('/api/token/', data: {
-// 'email': email,
-// 'password': password,
-// });
+      if (data != null && data is Map && data.containsKey('error')) {
+        return {
+          'success': false,
+          'error': data['error'],
+          'message': data['error'],
+        };
+      } else if (statusCode == 400) {
+        return {
+          'success': false,
+          'error': 'Bad request. Please check your input.',
+          'message': 'Bad request. Please check your input.',
+        };
+      } else if (statusCode == 401) {
+        return {
+          'success': false,
+          'error': 'Unauthorized. Please login again.',
+          'message': 'Unauthorized. Please login again.',
+        };
+      } else if (statusCode == 404) {
+        return {
+          'success': false,
+          'error': 'Resource not found.',
+          'message': 'Resource not found.',
+        };
+      } else if (statusCode == 500) {
+        return {
+          'success': false,
+          'error': 'Server error. Please try again later.',
+          'message': 'Server error. Please try again later.',
+        };
+      }
+    }
+  }
 
-// // Store access token securely
-// final access = response.data['access'];
-// if (access != null) {
-// setAuthToken(access);
-// }
+  return {
+    'success': false,
+    'error': 'Network error. Please check your connection.',
+    'message': 'Network error. Please check your connection.',
+  };
+}
 
-// return {
-// 'success': true,
-// 'data': response.data,
-// 'access': access,
-// };
-// } on DioException catch (e) {
-// throw Exception(_handleError(e));
-// }
-// }
+// Remove authentication token
+void removeAuthToken() {
+  _dio.options.headers.remove('Authorization');
+}
 
-// // Course Catalog with Search
-//  Future<Map<String, dynamic>> getCourseCatalog({
-// String? search,
-// String? category,
-// int? page,
-// int? limit,
-// }) async {
-// try {
-// final queryParameters = <String, dynamic>{};
-// if (search != null) queryParameters['name'] = search;
-// if (category != null) queryParameters['category'] = category;
-// if (page != null) queryParameters['page'] = page;
-// if (limit != null) queryParameters['limit'] = limit;
+// Login with Token (JWT)
+Future<Map<String, dynamic>> loginWithToken({
+  required String email,
+  required String password,
+}) async {
+  try {
+    final response = await _dio.post('/api/token/', data: {
+      'email': email,
+      'password': password,
+    });
 
-// final response = await _dio.get('/api/courses/', queryParameters: queryParameters);
+// Store access token securely
+    final access = response.data['access'];
+    if (access != null) {
+      setAuthToken(access);
+    }
 
-// if (response.data['success'] == true) {
-// return {
-// 'success': true,
-// 'data': response.data,
-// 'courses': response.data['results'] ?? response.data['courses'] ?? response.data,
-// };
-// } else {
-// throw Exception(response.data['error'] ?? 'Failed to fetch course catalog');
-// }
-// } on DioException catch (e) {
-// throw Exception(_handleError(e));
-// }
-// }
+    return {
+      'success': true,
+      'data': response.data,
+      'access': access,
+    };
+  } on DioException catch (e) {
+    throw Exception(_handleError(e));
+  }
+}
 
-// // Course Detail
-//  Future<Map<String, dynamic>> getCourseDetail(String courseId) async {
-// try {
-// final response = await _dio.get('/api/courses/$courseId/detail');
+// Course Catalog with Search
+Future<Map<String, dynamic>> getCourseCatalog({
+  String? search,
+  String? category,
+  int? page,
+  int? limit,
+}) async {
+  try {
+    final queryParameters = <String, dynamic>{};
+    if (search != null) queryParameters['name'] = search;
+    if (category != null) queryParameters['category'] = category;
+    if (page != null) queryParameters['page'] = page;
+    if (limit != null) queryParameters['limit'] = limit;
 
-// if (response.data['success'] == true) {
-// return {
-// 'success': true,
-// 'data': response.data,
-// 'course': response.data,
-// };
-// } else {
-// throw Exception(response.data['error'] ?? 'Failed to fetch course detail');
-// }
-// } on DioException catch (e) {
-// throw Exception(_handleError(e));
-// }
-// }
+    final response =
+        await _dio.get('/api/courses/', queryParameters: queryParameters);
 
-// // Learning Session
-//  Future<Map<String, dynamic>> startLearningSession(String courseId) async {
-// try {
-// final response = await _dio.post('/api/sessions/start', data: {
-// 'course_id': courseId,
-// });
+    if (response.data['success'] == true) {
+      return {
+        'success': true,
+        'data': response.data,
+        'courses': response.data['results'] ??
+            response.data['courses'] ??
+            response.data,
+      };
+    } else {
+      throw Exception(
+          response.data['error'] ?? 'Failed to fetch course catalog');
+    }
+  } on DioException catch (e) {
+    throw Exception(_handleError(e));
+  }
+}
 
-// if (response.data['success'] == true) {
-// return {
-// 'success': true,
-// 'data': response.data,
-// 'sessionId': response.data['session_id'],
-// 'session': response.data,
-// };
-// } else {
-// throw Exception(response.data['error'] ?? 'Failed to start learning session');
-// }
-// } on DioException catch (e) {
-// throw Exception(_handleError(e));
-// }
-// }
+// Course Detail
+Future<Map<String, dynamic>> getCourseDetail(String courseId) async {
+  try {
+    final response = await _dio.get('/api/courses/$courseId/detail');
 
-// // Submit Session Answer
-//  Future<Map<String, dynamic>> submitSessionAnswer(String sessionId, String answer) async {
-// try {
-// final response = await _dio.post('/api/sessions/$sessionId/answer', data: {
-// 'answer': answer,
-// });
+    if (response.data['success'] == true) {
+      return {
+        'success': true,
+        'data': response.data,
+        'course': response.data,
+      };
+    } else {
+      throw Exception(
+          response.data['error'] ?? 'Failed to fetch course detail');
+    }
+  } on DioException catch (e) {
+    throw Exception(_handleError(e));
+  }
+}
 
-// if (response.data['success'] == true) {
-// return {
-// 'success': true,
-// 'data': response.data,
-// 'isCorrect': response.data['is_correct'] ?? response.data['correct'],
-// 'feedback': response.data['feedback'],
-// };
-// } else {
-// throw Exception(response.data['error'] ?? 'Failed to submit answer');
-// }
-// } on DioException catch (e) {
-// throw Exception(_handleError(e));
-// }
-// }
+// Learning Session
+Future<Map<String, dynamic>> startLearningSession(String courseId) async {
+  try {
+    final response = await _dio.post('/api/sessions/start', data: {
+      'course_id': courseId,
+    });
 
-// // Create Schedule
-//  Future<Map<String, dynamic>> createSchedule({
-// required String courseId,
-// required String title,
-// required DateTime startAt,
-// required DateTime endAt,
-// String? description,
-// String? location,
-// bool? isRecurring,
-// }) async {
-// try {
-// final response = await _dio.post('/api/schedules', data: {
-// 'course_id': courseId,
-// 'title': title,
-// 'start_at': startAt.toIso8601String(),
-// 'end_at': endAt.toIso8601String(),
-// if (description != null) 'description': description,
-// if (location != null) 'location': location,
-// if (isRecurring != null) 'is_recurring': isRecurring,
-// });
+    if (response.data['success'] == true) {
+      return {
+        'success': true,
+        'data': response.data,
+        'sessionId': response.data['session_id'],
+        'session': response.data,
+      };
+    } else {
+      throw Exception(
+          response.data['error'] ?? 'Failed to start learning session');
+    }
+  } on DioException catch (e) {
+    throw Exception(_handleError(e));
+  }
+}
 
-// if (response.data['success'] == true) {
-// return {
-// 'success': true,
-// 'data': response.data,
-// 'schedule': response.data,
-// };
-// } else {
-// throw Exception(response.data['error'] ?? 'Failed to create schedule');
-// }
-// } on DioException catch (e) {
-// throw Exception(_handleError(e));
-// }
-// }
+// Submit Session Answer
+Future<Map<String, dynamic>> submitSessionAnswer(
+    String sessionId, String answer) async {
+  try {
+    final response = await _dio.post('/api/sessions/$sessionId/answer', data: {
+      'answer': answer,
+    });
 
-// // Live AI News
-//  Future<Map<String, dynamic>> getLiveAINews({
-// int? limit,
-// String? category,
-// String? source,
-// }) async {
-// try {
-// final queryParameters = <String, dynamic>{};
-// if (limit != null) queryParameters['limit'] = limit;
-// if (category != null) queryParameters['category'] = category;
-// if (source != null) queryParameters['source'] = source;
+    if (response.data['success'] == true) {
+      return {
+        'success': true,
+        'data': response.data,
+        'isCorrect': response.data['is_correct'] ?? response.data['correct'],
+        'feedback': response.data['feedback'],
+      };
+    } else {
+      throw Exception(response.data['error'] ?? 'Failed to submit answer');
+    }
+  } on DioException catch (e) {
+    throw Exception(_handleError(e));
+  }
+}
 
-// final response = await _dio.get('/api/live/ai/news', queryParameters: queryParameters);
+// Create Schedule
+Future<Map<String, dynamic>> createSchedule({
+  required String courseId,
+  required String title,
+  required DateTime startAt,
+  required DateTime endAt,
+  String? description,
+  String? location,
+  bool? isRecurring,
+}) async {
+  try {
+    final response = await _dio.post('/api/schedules', data: {
+      'course_id': courseId,
+      'title': title,
+      'start_at': startAt.toIso8601String(),
+      'end_at': endAt.toIso8601String(),
+      if (description != null) 'description': description,
+      if (location != null) 'location': location,
+      if (isRecurring != null) 'is_recurring': isRecurring,
+    });
 
-// if (response.data['success'] == true) {
-// return {
-// 'success': true,
-// 'data': response.data,
-// 'news': response.data['results'] ?? response.data['news'] ?? response.data,
-// };
-// } else {
-// throw Exception(response.data['error'] ?? 'Failed to fetch AI news');
-// }
-// } on DioException catch (e) {
-// throw Exception(_handleError(e));
-// }
-// }
+    if (response.data['success'] == true) {
+      return {
+        'success': true,
+        'data': response.data,
+        'schedule': response.data,
+      };
+    } else {
+      throw Exception(response.data['error'] ?? 'Failed to create schedule');
+    }
+  } on DioException catch (e) {
+    throw Exception(_handleError(e));
+  }
+}
+
+// Live AI News
+Future<Map<String, dynamic>> getLiveAINews({
+  int? limit,
+  String? category,
+  String? source,
+}) async {
+  try {
+    final queryParameters = <String, dynamic>{};
+    if (limit != null) queryParameters['limit'] = limit;
+    if (category != null) queryParameters['category'] = category;
+    if (source != null) queryParameters['source'] = source;
+
+    final response =
+        await _dio.get('/api/live/ai/news', queryParameters: queryParameters);
+
+    if (response.data['success'] == true) {
+      return {
+        'success': true,
+        'data': response.data,
+        'news':
+            response.data['results'] ?? response.data['news'] ?? response.data,
+      };
+    } else {
+      throw Exception(response.data['error'] ?? 'Failed to fetch AI news');
+    }
+  } on DioException catch (e) {
+    throw Exception(_handleError(e));
+  }
+}

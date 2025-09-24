@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
@@ -149,12 +148,84 @@ class SportsMatch extends Equatable {
   bool get isMediumPriority => priority == 'medium';
   bool get isLowPriority => priority == 'low';
 
+  /// Create a copy of this match with updated fields
+  SportsMatch copyWith({
+    String? id,
+    String? sport,
+    String? league,
+    String? tournament,
+    String? format,
+    String? status,
+    DateTime? startTime,
+    DateTime? endTime,
+    String? venue,
+    String? city,
+    String? country,
+    List<SportsTeam>? teams,
+    SportsScore? currentScore,
+    List<SportsInning>? innings,
+    List<SportsEvent>? events,
+    String? result,
+    String? manOfTheMatch,
+    String? tossWinner,
+    String? tossDecision,
+    Map<String, dynamic>? metadata,
+    bool? isLive,
+    int? live_viewers,
+    String? streamingUrl,
+    List<String>? highlights,
+    SportsOdds? odds,
+    DateTime? lastUpdated,
+    String? priority,
+  }) {
+    return SportsMatch(
+      id: id ?? this.id,
+      sport: sport ?? this.sport,
+      league: league ?? this.league,
+      tournament: tournament ?? this.tournament,
+      format: format ?? this.format,
+      status: status ?? this.status,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+      venue: venue ?? this.venue,
+      city: city ?? this.city,
+      country: country ?? this.country,
+      teams: teams ?? this.teams,
+      currentScore: currentScore ?? this.currentScore,
+      innings: innings ?? this.innings,
+      events: events ?? this.events,
+      result: result ?? this.result,
+      manOfTheMatch: manOfTheMatch ?? this.manOfTheMatch,
+      tossWinner: tossWinner ?? this.tossWinner,
+      tossDecision: tossDecision ?? this.tossDecision,
+      metadata: metadata ?? this.metadata,
+      isLive: isLive ?? this.isLive,
+      live_viewers: live_viewers ?? this.live_viewers,
+      streamingUrl: streamingUrl ?? this.streamingUrl,
+      highlights: highlights ?? this.highlights,
+      odds: odds ?? this.odds,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
+      priority: priority ?? this.priority,
+    );
+  }
+
   String get matchTitle {
     if (teams.length >= 2) {
       return '${teams[0].name} vs ${teams[1].name}';
     }
     return 'Match $id';
   }
+
+  // Convenience getters to keep backwards-compatible field access used by UI
+  String get team1 => teams.isNotEmpty ? teams[0].name : '';
+  String get team2 => teams.length > 1 ? teams[1].name : '';
+  String get team1Logo => teams.isNotEmpty ? teams[0].logo : '';
+  String get team2Logo => teams.length > 1 ? teams[1].logo : '';
+  String get team1Score => currentScore?.team1Score['runs']?.toString() ?? '';
+  String get team2Score => currentScore?.team2Score['runs']?.toString() ?? '';
+  String get currentInning => currentScore?.currentInning ?? '';
+  String get seriesName => metadata['series_name']?.toString() ?? '';
+  String get matchNumber => metadata['match_number']?.toString() ?? id;
 
   String get shortStatus {
     switch (status) {
@@ -360,6 +431,7 @@ class SportsPlayer extends Equatable {
 
 /// Enhanced score model for all sports
 class SportsScore extends Equatable {
+  final String? matchId;
   final String? currentInning; // For cricket
   final Map<String, dynamic> team1Score;
   final Map<String, dynamic> team2Score;
@@ -377,6 +449,7 @@ class SportsScore extends Equatable {
   final String? additionalInfo;
 
   const SportsScore({
+    this.matchId,
     this.currentInning,
     required this.team1Score,
     required this.team2Score,
@@ -396,6 +469,7 @@ class SportsScore extends Equatable {
 
   factory SportsScore.fromJson(Map<String, dynamic> json) {
     return SportsScore(
+      matchId: json['match_id'] ?? json['matchId'],
       currentInning: json['current_inning'],
       team1Score: json['team1_score'] as Map<String, dynamic>? ?? {},
       team2Score: json['team2_score'] as Map<String, dynamic>? ?? {},
@@ -416,6 +490,7 @@ class SportsScore extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
+      'match_id': matchId,
       'current_inning': currentInning,
       'team1_score': team1Score,
       'team2_score': team2Score,
@@ -435,7 +510,7 @@ class SportsScore extends Equatable {
   }
 
   @override
-  List<Object?> get props => [currentInning, team1Score, team2Score];
+  List<Object?> get props => [matchId, currentInning, team1Score, team2Score];
 }
 
 /// Sports inning/period model

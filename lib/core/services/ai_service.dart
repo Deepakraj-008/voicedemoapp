@@ -1,4 +1,5 @@
-import 'dart:convert';
+import 'dart:convert' show json;
+
 import 'package:http/http.dart' as http;
 import 'package:sweetyai_learning_assistant/widgets/urls.dart' show URLS;
 
@@ -137,11 +138,11 @@ class AIService {
           .where(
             (model) =>
                 model['name'].toString().toLowerCase().contains(
-                  query.toLowerCase(),
-                ) ||
+                      query.toLowerCase(),
+                    ) ||
                 model['description'].toString().toLowerCase().contains(
-                  query.toLowerCase(),
-                ),
+                      query.toLowerCase(),
+                    ),
           )
           .toList();
     } catch (e) {
@@ -171,8 +172,8 @@ class AIService {
       return papers
           .where(
             (paper) => paper['category'].toString().toLowerCase().contains(
-              category.toLowerCase(),
-            ),
+                  category.toLowerCase(),
+                ),
           )
           .toList();
     } catch (e) {

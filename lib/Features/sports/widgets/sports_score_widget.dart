@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
-import 'dart:ui' as ui;
+// removed unused math import
+// removed unused dart:ui import
 import '../models/sports_match_model.dart';
 import 'sports_live_indicator.dart';
 
@@ -32,31 +32,42 @@ class SportsScoreWidget extends StatefulWidget {
 class _SportsScoreWidgetState extends State<SportsScoreWidget>
     with SingleTickerProviderStateMixin {
   late Animation<double> _scoreAnimation;
-  late Animation<double> _flipAnimation;
   late Animation<double> _glowAnimation;
   late Animation<double> _pulseAnimation;
 
   String _previousTeam1Score = '';
   String _previousTeam2Score = '';
-  bool _isScoreChanging = false;
+
+  String get _team1Score =>
+      widget.match.currentScore?.team1Score['runs']?.toString() ?? '0';
+  String get _team2Score =>
+      widget.match.currentScore?.team2Score['runs']?.toString() ?? '0';
+  String get _currentInning =>
+      widget.match.currentScore?.currentInning ?? widget.match.currentInning;
 
   @override
   void initState() {
     super.initState();
 
-    _previousTeam1Score = widget.match.team1Score;
-    _previousTeam2Score = widget.match.team2Score;
+    _previousTeam1Score = _team1Score;
+    _previousTeam2Score = _team2Score;
 
     _initializeAnimations();
-
-    // Listen for score changes
-    widget.match.addListener(_handleScoreChange);
+    // Initial scores set. Score changes are detected in didUpdateWidget
   }
 
   @override
   void dispose() {
-    widget.match.removeListener(_handleScoreChange);
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant SportsScoreWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Detect when the match object or its score changed and trigger animation
+    if (oldWidget.match.currentScore != widget.match.currentScore) {
+      _handleScoreChange();
+    }
   }
 
   void _initializeAnimations() {
@@ -66,14 +77,6 @@ class _SportsScoreWidgetState extends State<SportsScoreWidget>
         curve: const Interval(0.0, 0.3, curve: Curves.easeOutBack),
       ),
     );
-
-    _flipAnimation = Tween<double>(begin: 0.0, end: math.pi).animate(
-      CurvedAnimation(
-        parent: widget.animationController,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeInOutCubic),
-      ),
-    );
-
     _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: widget.animationController,
@@ -93,17 +96,16 @@ class _SportsScoreWidgetState extends State<SportsScoreWidget>
   }
 
   void _handleScoreChange() {
-    if (_previousTeam1Score != widget.match.team1Score ||
-        _previousTeam2Score != widget.match.team2Score) {
+    if (_previousTeam1Score != _team1Score ||
+        _previousTeam2Score != _team2Score) {
       setState(() {
-        _isScoreChanging = true;
+        // trigger a small visual change while animation runs
       });
 
       widget.animationController.forward().then((_) {
         setState(() {
-          _previousTeam1Score = widget.match.team1Score;
-          _previousTeam2Score = widget.match.team2Score;
-          _isScoreChanging = false;
+          _previousTeam1Score = _team1Score;
+          _previousTeam2Score = _team2Score;
         });
         widget.animationController.reset();
       });
@@ -224,7 +226,7 @@ class _SportsScoreWidgetState extends State<SportsScoreWidget>
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            widget.match.currentInning,
+                            _currentInning,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
@@ -267,7 +269,7 @@ class _SportsScoreWidgetState extends State<SportsScoreWidget>
             children: [
               _buildTeamScore(
                 widget.match.team1,
-                widget.match.team1Score,
+                _team1Score,
                 widget.match.team1Logo,
                 sportColor,
                 isLeft: true,
@@ -305,7 +307,7 @@ class _SportsScoreWidgetState extends State<SportsScoreWidget>
 
               _buildTeamScore(
                 widget.match.team2,
-                widget.match.team2Score,
+                _team2Score,
                 widget.match.team2Logo,
                 sportColor,
                 isLeft: false,
@@ -314,8 +316,7 @@ class _SportsScoreWidgetState extends State<SportsScoreWidget>
           ),
 
           // Additional score details
-          if (widget.match.team1Score.isNotEmpty &&
-              widget.match.team2Score.isNotEmpty)
+          if (_team1Score.isNotEmpty && _team2Score.isNotEmpty)
             Column(
               children: [
                 const SizedBox(height: 12),
@@ -544,7 +545,7 @@ class _SportsScoreWidgetState extends State<SportsScoreWidget>
               overflow: TextOverflow.ellipsis,
             ),
           ],
-          if (widget.match.result.isNotEmpty) ...[
+          if (widget.match.result?.isNotEmpty ?? false) ...[
             const SizedBox(height: 4),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -557,7 +558,7 @@ class _SportsScoreWidgetState extends State<SportsScoreWidget>
                 ),
               ),
               child: Text(
-                widget.match.result,
+                widget.match.result ?? '',
                 style: TextStyle(
                   color: sportColor.withOpacity(0.9),
                   fontSize: 10,
@@ -604,17 +605,17 @@ class _SportsScoreWidgetState extends State<SportsScoreWidget>
               ),
             ),
           Text(
-            '${widget.match.team1Score} - ${widget.match.team2Score}',
+            '$_team1Score - $_team2Score',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
           ),
-          if (widget.match.currentInning.isNotEmpty) ...[
+          if (_currentInning.isNotEmpty) ...[
             const SizedBox(width: 8),
             Text(
-              widget.match.currentInning,
+              _currentInning,
               style: TextStyle(
                 color: Colors.grey.shade400,
                 fontSize: 12,
@@ -652,7 +653,7 @@ class _SportsScoreWidgetState extends State<SportsScoreWidget>
               ),
             ),
           Text(
-            '${widget.match.team1Score}-${widget.match.team2Score}',
+            '$_team1Score-$_team2Score',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 12,
