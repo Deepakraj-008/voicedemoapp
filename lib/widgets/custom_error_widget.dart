@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:sweetyai_learning_assistant/core/app_routes.dart' show AppRoutes;
 
 import '../core/app_export.dart';
 

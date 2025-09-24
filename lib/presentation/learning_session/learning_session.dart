@@ -12,7 +12,7 @@ import './widgets/progress_indicator_widget.dart';
 import './widgets/voice_waveform_widget.dart';
 
 class LearningSession extends StatefulWidget {
-  const LearningSession({Key? key}) : super(key: key);
+  const LearningSession({Key? key, required String sessionId}) : super(key: key);
 
   @override
   State<LearningSession> createState() => _LearningSessionState();

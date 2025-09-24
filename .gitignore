@@ -45,3 +45,18 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Android Gradle files
+/android/.gradle/
+/android/captures/
+/android/gradlew
+/android/gradlew.bat
+/android/local.properties
+/android/.idea/
+/android/.settings/
+/android/app/build/
+/android/app/libs/
+
+# Gradle user home
+.gradle-user-home/
+.gradle/

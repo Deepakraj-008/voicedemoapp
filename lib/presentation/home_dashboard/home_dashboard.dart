@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:sweetyai_learning_assistant/core/app_routes.dart' show AppRoutes;
 
 import '../../core/app_export.dart';
 import './widgets/branded_header_widget.dart';
@@ -9,6 +10,7 @@ import './widgets/recent_achievements_card.dart';
 import './widgets/today_schedule_card.dart';
 import './widgets/voice_assistant_button.dart';
 import './widgets/voice_waveform_widget.dart';
+import './widgets/features_grid.dart';
 
 class HomeDashboard extends StatefulWidget {
   const HomeDashboard({Key? key}) : super(key: key);
@@ -337,7 +339,7 @@ class _HomeDashboardState extends State<HomeDashboard>
                       child: TabBarView(
                         controller: _tabController,
                         children: [
-                          _buildHomeTab(),
+                          _buildNewHomeTab(),
                           _buildPlaceholderTab("Courses"),
                           _buildPlaceholderTab("Schedule"),
                           _buildPlaceholderTab("Profile"),
@@ -367,6 +369,7 @@ class _HomeDashboardState extends State<HomeDashboard>
     );
   }
 
+  // ignore: unused_element
   Widget _buildHomeTab() {
     return RefreshIndicator(
       key: _refreshIndicatorKey,
@@ -392,6 +395,114 @@ class _HomeDashboardState extends State<HomeDashboard>
               achievements: _recentAchievements,
             ),
             SizedBox(height: 25.h), // Space for floating button
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNewHomeTab() {
+    // Feature list — these navigate to existing routes in the app
+    final features = <FeatureItem>[
+      FeatureItem(
+        id: 'courses',
+        title: 'Courses',
+        subtitle: 'Browse & continue learning',
+        lottieAsset: 'assets/crex/img_app_logo.svg',
+        fallbackIcon: Icons.school,
+        onTap: () => Navigator.pushNamed(context, AppRoutes.courseCatalog),
+      ),
+      FeatureItem(
+        id: 'schedule',
+        title: 'Study Schedule',
+        subtitle: 'Plan your sessions',
+        lottieAsset: 'assets/crex/banner_asia_cup.jpg',
+        fallbackIcon: Icons.schedule,
+        onTap: () => Navigator.pushNamed(context, AppRoutes.studySchedule),
+      ),
+      FeatureItem(
+        id: 'live',
+        title: 'Voice Assistant',
+        subtitle: 'Talk to Sweety',
+        lottieAsset: 'assets/crex/img_app_logo.svg',
+        fallbackIcon: Icons.mic,
+        onTap: () => Navigator.pushNamed(context, AppRoutes.voiceAssistantChat),
+      ),
+      FeatureItem(
+        id: 'crex',
+        title: 'Sports Hub',
+        subtitle: 'Live scores & matches',
+        lottieAsset: 'assets/crex/banner_asia_cup.jpg',
+        fallbackIcon: Icons.sports,
+        onTap: () => Navigator.pushNamed(context, AppRoutes.crexHub),
+      ),
+      FeatureItem(
+        id: 'analytics',
+        title: 'Progress',
+        subtitle: 'Track your growth',
+        lottieAsset: 'assets/crex/img_app_logo.svg',
+        fallbackIcon: Icons.insights,
+        onTap: () => Navigator.pushNamed(context, AppRoutes.progressAnalytics),
+      ),
+      FeatureItem(
+        id: 'voice_dash',
+        title: 'Voice Dashboard',
+        subtitle: 'Sessions & recordings',
+        lottieAsset: 'assets/crex/img_app_logo.svg',
+        fallbackIcon: Icons.mic_none,
+        onTap: () => Navigator.pushNamed(context, AppRoutes.voiceDashboard),
+      ),
+    ];
+
+    return RefreshIndicator(
+      key: _refreshIndicatorKey,
+      onRefresh: _onRefresh,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 2.h),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                'Features',
+                style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
+                  color: AppTheme.textPrimaryLight,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            FeaturesGrid(features: features),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                'Quick Actions',
+                style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                  color: AppTheme.textPrimaryLight,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            QuickActionCard(
+                actions: _quickActions, onActionTap: _onQuickActionTap),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                'Recent Achievements',
+                style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                  color: AppTheme.textPrimaryLight,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            RecentAchievementsCard(achievements: _recentAchievements),
+            SizedBox(height: 20.h),
           ],
         ),
       ),
