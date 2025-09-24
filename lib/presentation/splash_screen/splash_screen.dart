@@ -3,11 +3,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sizer/sizer.dart';
+import 'package:sweetyai_learning_assistant/widgets/urls.dart' show URLS;
 
 import './widgets/animated_logo_widget.dart';
 import './widgets/loading_progress_widget.dart';
 import './widgets/permission_modal_widget.dart';
 import './widgets/voice_waveform_widget.dart';
+Future<void> pingBackend(dynamic http) async {
+  final r = await http.get(Uri.parse(URLS.baseUrl + URLS.appConfig));
+  print("APP CONFIG: ${r.statusCode} ${r.body}");
+}
 
 /// Splash Screen for VoiceLearn AI
 /// Provides branded app launch experience while initializing AI voice services

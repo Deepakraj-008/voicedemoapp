@@ -236,34 +236,16 @@ class _VoiceActivationWidgetState extends State<VoiceActivationWidget>
           AnimatedBuilder(
             animation: _isWakeWordDetected ? _waveAnimation : _pulseAnimation,
             builder: (context, child) {
-              return Container(
-                width: 20.w,
-                height: 20.w,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+              return Transform.scale(
+                scale: _isWakeWordDetected
+                    ? _waveAnimation.value
+                    : _pulseAnimation.value,
+                child: CustomIconWidget(
+                  iconName: _isWakeWordDetected ? 'mic' : 'mic_none',
                   color: _isWakeWordDetected
-                      ? colorScheme.primary.withValues(alpha: 0.2)
-                      : colorScheme.surfaceContainerHighest,
-                  border: Border.all(
-                    color: _isWakeWordDetected
-                        ? colorScheme.primary
-                        : colorScheme.outline.withValues(alpha: 0.3),
-                    width: 2,
-                  ),
-                ),
-                child: Transform.scale(
-                  scale: _isWakeWordDetected
-                      ? _waveAnimation.value
-                      : _pulseAnimation.value,
-                  child: Center(
-                    child: CustomIconWidget(
-                      iconName: _isWakeWordDetected ? 'mic' : 'mic_none',
-                      color: _isWakeWordDetected
-                          ? colorScheme.primary
-                          : colorScheme.onSurfaceVariant,
-                      size: 8.w,
-                    ),
-                  ),
+                      ? colorScheme.primary
+                      : colorScheme.onSurfaceVariant,
+                  size: 8.w,
                 ),
               );
             },

@@ -195,66 +195,42 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: 8.h),
+                SizedBox(height: 6.h),
 
                 // Sweety Logo
-                Container(
-                  width: 25.w,
-                  height: 25.w,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [
-                        colorScheme.primary,
-                        colorScheme.secondary,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colorScheme.primary.withValues(alpha: 0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Text(
-                      'S',
-                      style: GoogleFonts.inter(
-                        fontSize: 12.w,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
+                Text(
+                  'S',
+                  style: GoogleFonts.inter(
+                    fontSize: 20.w,
+                    fontWeight: FontWeight.w700,
+                    color: colorScheme.primary,
                   ),
                 ),
 
-                SizedBox(height: 3.h),
+                SizedBox(height: 2.h),
 
                 Text(
                   'SweetyAI',
                   style: GoogleFonts.inter(
-                    fontSize: 28,
+                    fontSize: 24,
                     fontWeight: FontWeight.w700,
                     color: colorScheme.onSurface,
                     letterSpacing: -0.5,
                   ),
                 ),
 
-                SizedBox(height: 1.h),
+                SizedBox(height: 0.5.h),
 
                 Text(
                   'Your AI Learning Assistant',
                   style: GoogleFonts.inter(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w400,
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
 
-                SizedBox(height: 6.h),
+                SizedBox(height: 4.h),
 
                 // Voice Activation Widget
                 VoiceActivationWidget(
@@ -262,7 +238,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   onLoginTriggered: _handleVoiceLogin,
                 ),
 
-                SizedBox(height: 4.h),
+                SizedBox(height: 3.h),
 
                 // Email Field
                 VoiceInputField(
@@ -352,7 +328,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
 
-                SizedBox(height: 3.h),
+                SizedBox(height: 2.h),
 
                 // Biometric Login
                 Row(
@@ -379,12 +355,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
 
-                SizedBox(height: 4.h),
+                SizedBox(height: 3.h),
 
                 // Social Login
                 SocialLoginButtons(),
 
-                SizedBox(height: 4.h),
+                SizedBox(height: 3.h),
 
                 // Sign Up Link
                 Row(
@@ -414,7 +390,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
 
-                SizedBox(height: 2.h),
+                SizedBox(height: 1.h),
               ],
             ),
           ),

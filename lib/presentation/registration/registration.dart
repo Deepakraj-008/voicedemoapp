@@ -352,34 +352,19 @@ class _RegistrationState extends State<Registration> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SizedBox(height: 8.h),
+                          SizedBox(height: 2.h),
 
                           // Header
                           Center(
                             child: Column(
                               children: [
-                                Container(
-                                  width: 20.w,
-                                  height: 20.w,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        AppTheme.lightTheme.colorScheme.primary,
-                                        AppTheme
-                                            .lightTheme.colorScheme.tertiary,
-                                      ],
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child: CustomIconWidget(
-                                      iconName: 'school',
-                                      color: Colors.white,
-                                      size: 10.w,
-                                    ),
-                                  ),
+                                CustomIconWidget(
+                                  iconName: 'school',
+                                  color:
+                                      AppTheme.lightTheme.colorScheme.primary,
+                                  size: 10.w,
                                 ),
-                                SizedBox(height: 3.h),
+                                SizedBox(height: 2.h),
                                 Text(
                                   'Join VoiceLearn AI',
                                   style: AppTheme
@@ -390,7 +375,7 @@ class _RegistrationState extends State<Registration> {
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
-                                SizedBox(height: 1.h),
+                                SizedBox(height: 0.5.h),
                                 Text(
                                   'Create your account and start your AI-powered learning journey',
                                   style: AppTheme
@@ -406,7 +391,7 @@ class _RegistrationState extends State<Registration> {
                             ),
                           ),
 
-                          SizedBox(height: 6.h),
+                          SizedBox(height: 2.h),
 
                           // Form fields
                           VoiceInputField(

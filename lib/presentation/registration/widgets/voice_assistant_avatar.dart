@@ -67,35 +67,10 @@ class _VoiceAssistantAvatarState extends State<VoiceAssistantAvatar>
           builder: (context, child) {
             return Transform.scale(
               scale: widget.isListening ? _pulseAnimation.value : 1.0,
-              child: Container(
-                width: 12.w,
-                height: 12.w,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      AppTheme.lightTheme.colorScheme.tertiary,
-                      AppTheme.lightTheme.colorScheme.secondary,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.lightTheme.colorScheme.tertiary
-                          .withValues(alpha: 0.3),
-                      blurRadius: widget.isListening ? 12 : 6,
-                      spreadRadius: widget.isListening ? 2 : 0,
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: CustomIconWidget(
-                    iconName: widget.isListening ? 'mic' : 'assistant',
-                    color: Colors.white,
-                    size: 6.w,
-                  ),
-                ),
+              child: CustomIconWidget(
+                iconName: widget.isListening ? 'mic' : 'assistant',
+                color: AppTheme.lightTheme.colorScheme.secondary,
+                size: 8.w,
               ),
             );
           },

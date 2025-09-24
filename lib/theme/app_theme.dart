@@ -270,6 +270,8 @@ class AppTheme {
       }),
     ),
 
+    // (splash settings set once later; avoid duplication)
+
     checkboxTheme: CheckboxThemeData(
       fillColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
@@ -359,6 +361,10 @@ class AppTheme {
       collapsedIconColor: textSecondaryLight,
     ),
     dialogTheme: DialogThemeData(backgroundColor: dialogLight),
+    // Remove default blue splash/ripple globally for light theme as well
+    splashFactory: NoSplash.splashFactory,
+    highlightColor: Colors.transparent,
+    splashColor: Colors.transparent,
   );
 
   /// Dark theme optimized for extended study sessions
@@ -639,6 +645,10 @@ class AppTheme {
       collapsedIconColor: textSecondaryDark,
     ),
     dialogTheme: DialogThemeData(backgroundColor: dialogDark),
+    // Remove default blue splash/ripple globally for dark theme as well
+    splashFactory: NoSplash.splashFactory,
+    highlightColor: Colors.transparent,
+    splashColor: Colors.transparent,
   );
 
   /// Helper method to build text theme based on brightness

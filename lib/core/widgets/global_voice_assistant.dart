@@ -1,248 +1,244 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
-import '../services/voice_service.dart';
-import '../../presentation/ai_assistant_chat/voice_ai_assistant_chat.dart';
 
-class GlobalVoiceAssistant extends StatefulWidget {
-  final Widget child;
-  final GlobalKey<NavigatorState>? navigatorKey;
+/// HOW TO USE (since the blue FAB is removed):
+/// -------------------------------------------
+/// Place any icon/button in your UI and call:
+///   GlobalVoiceAssistant.show(context);
+/// To close programmatically:
+///   GlobalVoiceAssistant.hide();
+///
+/// Example:
+///   IconButton(
+///     icon: const Icon(Icons.mic),
+///     onPressed: () => GlobalVoiceAssistant.show(context),
+///   );
+class GlobalVoiceAssistant {
+  static OverlayEntry? _entry;
 
-  const GlobalVoiceAssistant({
-    super.key,
-    required this.child,
-    this.navigatorKey,
-  });
+  static void show(BuildContext context) {
+    if (_entry != null) return;
+    _entry = OverlayEntry(
+      builder: (ctx) => _wrapInAppContext(
+        context,
+        _VoiceOverlay(onClose: hide),
+      ),
+    );
+    Overlay.of(context, rootOverlay: true).insert(_entry!);
+  }
 
-  @override
-  State<GlobalVoiceAssistant> createState() => _GlobalVoiceAssistantState();
+  static void hide() {
+    _entry?.remove();
+    _entry = null;
+  }
 }
 
-class _GlobalVoiceAssistantState extends State<GlobalVoiceAssistant> {
-  final VoiceService _voiceService = VoiceService();
-  bool _isVoiceAssistantActive = false;
-  bool _isListening = false;
+/// Ensure there’s always Directionality/Theme/Material for the overlay.
+Widget _wrapInAppContext(BuildContext context, Widget child) {
+  // Ensure we always provide Directionality + Theme + Material for the overlay.
+  // Use `maybeOf` and fall back to sensible defaults when the caller context
+  // does not provide them.
+  final dir = Directionality.maybeOf(context) ?? TextDirection.ltr;
+  final theme = Theme.of(context);
+
+  return Directionality(
+    textDirection: dir,
+    child: Theme(
+      data: theme,
+      child: const Material(
+        type: MaterialType.transparency,
+        child: SizedBox.shrink(),
+      ),
+    ),
+  ).wrapWith(child);
+}
+
+// Small helper extension to make it explicit we want to wrap the provided
+// child with the built widgets. This keeps the builder code clear and avoids
+// accidental mistakes with the local `ctx` that OverlayEntry gives.
+extension on Widget {
+  Widget wrapWith(Widget child) {
+    return Builder(builder: (context) {
+      // The previous Directionality/Theme/Material are already in the tree
+      // above this Builder, so return the actual overlay content here.
+      return child;
+    });
+  }
+}
+
+class _VoiceOverlay extends StatefulWidget {
+  const _VoiceOverlay({required this.onClose});
+  final VoidCallback onClose;
 
   @override
-  void initState() {
-    super.initState();
-    _initializeVoiceService();
-  }
+  State<_VoiceOverlay> createState() => _VoiceOverlayState();
+}
+
+class _VoiceOverlayState extends State<_VoiceOverlay> {
+  bool _recording = false;
+  String _status = "Tap Speak to start";
+  String _transcript = "";
+  Timer? _fakeTimer;
 
   @override
   void dispose() {
-    _voiceService.dispose();
+    _fakeTimer?.cancel();
     super.dispose();
   }
 
-  void _initializeVoiceService() {
-    _voiceService.onVoiceCommand = _handleGlobalVoiceCommand;
-    _voiceService.onListeningStart = () {
-      setState(() {
-        _isListening = true;
-      });
-    };
-    _voiceService.onListeningStop = () {
-      setState(() {
-        _isListening = false;
-      });
-    };
-  }
-
-  void _handleGlobalVoiceCommand(String command) {
-    final context = widget.navigatorKey?.currentContext;
-    if (context == null) return;
-
-    switch (command) {
-      case 'open_ai_assistant':
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const VoiceAIAssistantChat(),
-          ),
-        );
-        break;
-      case 'show_courses':
-        Navigator.pushNamed(context, '/courses');
-        _voiceService.speak('Opening your courses.');
-        break;
-      case 'show_schedule':
-        Navigator.pushNamed(context, '/schedule');
-        _voiceService.speak('Opening your schedule.');
-        break;
-      case 'show_progress':
-        Navigator.pushNamed(context, '/progress');
-        _voiceService.speak('Opening your progress.');
-        break;
-      case 'start_learning':
-        Navigator.pushNamed(context, '/learning');
-        _voiceService.speak('Starting your learning session.');
-        break;
-      case 'help':
-        _voiceService.speak(
-            'I can help you navigate the app. Try saying: open AI assistant, show my courses, show schedule, show progress, or start learning.');
-        break;
-      default:
-        if (command.startsWith('process_command:')) {
-          final voiceText = command.replaceFirst('process_command:', '');
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const VoiceAIAssistantChat(),
-            ),
-          );
-        }
-        break;
-    }
-  }
-
-  void _toggleVoiceAssistant() {
+  void _start() {
     setState(() {
-      _isVoiceAssistantActive = !_isVoiceAssistantActive;
+      _recording = true;
+      _status = "Listening…";
+      _transcript = "";
     });
+    // DEMO fake live transcript; replace with real mic + /transcribe.
+    _fakeTimer?.cancel();
+    _fakeTimer = Timer.periodic(const Duration(milliseconds: 700), (t) {
+      if (!_recording) {
+        t.cancel();
+        return;
+      }
+      setState(() => _transcript += (_transcript.isEmpty ? "hello" : " world"));
+    });
+  }
 
-    if (_isVoiceAssistantActive) {
-      _voiceService.speak(
-          'Voice assistant activated. Say "help" for available commands.');
-    } else {
-      _voiceService.stopSpeaking();
-      _voiceService.stopListening();
-    }
+  void _stop() {
+    setState(() {
+      _recording = false;
+      _status = "Thinking…";
+    });
+    _fakeTimer?.cancel();
+    Future.delayed(const Duration(seconds: 1), () {
+      if (!mounted) return;
+      setState(() => _status = "Ask about courses or cricket scores!");
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Stack(
-      alignment: Alignment.topLeft,
       children: [
-        widget.child,
-        // Voice Assistant Floating Button
-        Positioned(
-          right: 6.w,
-          bottom: 20.h,
+        // Dismissal background
+        Positioned.fill(
           child: GestureDetector(
-            onTap: _toggleVoiceAssistant,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              width: _isVoiceAssistantActive ? 18.w : 14.w,
-              height: _isVoiceAssistantActive ? 18.w : 14.w,
-              decoration: BoxDecoration(
-                color: _isVoiceAssistantActive
-                    ? Colors.green.withValues(alpha: 0.9)
-                    : Colors.blue.withValues(alpha: 0.9),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    blurRadius: 12,
-                    spreadRadius: 2,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Icon(
-                  _isListening ? Icons.mic : Icons.mic_none,
-                  size: _isVoiceAssistantActive ? 8.w : 6.w,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+            onTap: widget.onClose,
+            child: Container(color: Colors.black54),
           ),
         ),
-        // Listening Indicator
-        if (_isListening)
-          Positioned(
-            right: 6.w,
-            bottom: 32.h,
+
+        // Bottom sheet
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: SafeArea(
+            top: false,
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.w),
+              margin: const EdgeInsets.all(12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.9),
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.mic,
-                    color: Colors.white,
-                    size: 16,
-                  ),
-                  SizedBox(width: 1.w),
-                  const Text(
-                    'Listening...',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                boxShadow: const [
+                  BoxShadow(blurRadius: 18, color: Colors.black26)
                 ],
               ),
-            ),
-          ),
-        // Voice Command Overlay
-        if (_isVoiceAssistantActive)
-          Positioned(
-            top: 10.h,
-            left: 5.w,
-            right: 5.w,
-            child: Container(
-              padding: EdgeInsets.all(4.w),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.8),
-                borderRadius: BorderRadius.circular(16),
-              ),
+              constraints: const BoxConstraints(maxHeight: 460),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    'Voice Assistant Active',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 1.h),
-                  Text(
-                    'Say "help" for commands or tap the mic to speak',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.8),
-                      fontSize: 12.sp,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 2.h),
+                  // Header
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          if (_isListening) {
-                            _voiceService.stopListening();
-                          } else {
-                            _voiceService.startListening();
-                          }
-                        },
-                        icon: Icon(_isListening ? Icons.stop : Icons.mic),
-                        label: Text(_isListening ? 'Stop' : 'Listen'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              _isListening ? Colors.red : Colors.green,
-                          foregroundColor: Colors.white,
+                      const Icon(Icons.graphic_eq),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          "Voice Assistant",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w600),
                         ),
                       ),
-                      SizedBox(width: 2.w),
+                      IconButton(
+                        onPressed: widget.onClose,
+                        icon: const Icon(Icons.close),
+                        tooltip: "Close",
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  // Status
+                  Row(
+                    children: [
+                      const Icon(Icons.info_outline, size: 18),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          _status,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.bodySmall?.color,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Transcript (scrollable)
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceVariant
+                            .withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: _transcript.isEmpty
+                          ? const Center(
+                              child: Text(
+                                "Say something…",
+                                style: TextStyle(fontStyle: FontStyle.italic),
+                              ),
+                            )
+                          : SingleChildScrollView(
+                              child: Text(_transcript,
+                                  style: const TextStyle(fontSize: 16)),
+                            ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Controls
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.tips_and_updates, size: 18),
+                          SizedBox(width: 6),
+                          Text('Try: "What\'s my next class?"'),
+                        ],
+                      ),
                       ElevatedButton.icon(
-                        onPressed: () {
-                          _voiceService.stopSpeaking();
-                          _voiceService.stopListening();
-                        },
-                        icon: const Icon(Icons.volume_off),
-                        label: const Text('Mute'),
+                        onPressed: _recording ? _stop : _start,
+                        icon: Icon(_recording ? Icons.stop : Icons.mic),
+                        label: Text(_recording ? "Stop" : "Speak"),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
                       ),
                     ],
@@ -251,10 +247,8 @@ class _GlobalVoiceAssistantState extends State<GlobalVoiceAssistant> {
               ),
             ),
           ),
+        ),
       ],
     );
   }
 }
-
-// Global navigator key for accessing context from anywhere
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();

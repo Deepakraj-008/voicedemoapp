@@ -20,7 +20,7 @@ class _VoiceDashboardState extends State<VoiceDashboard>
   late TabController _tabController;
   bool _isListening = false;
   bool _isRefreshing = false;
-  int _currentTabIndex = 0;
+  // int _currentTabIndex = 0; // kept for future use if we add local tab-state UI
 
   // Mock user data
   final String _userName = "Alex";
@@ -63,12 +63,12 @@ class _VoiceDashboardState extends State<VoiceDashboard>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    // There are 6 Tab widgets declared in the AppBar; ensure controller length matches.
+    _tabController = TabController(length: 6, vsync: this);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
-        setState(() {
-          _currentTabIndex = _tabController.index;
-        });
+        // local UI state for tab index not currently used — just trigger
+        // navigation when tab changes.
         _handleTabNavigation(_tabController.index);
       }
     });
@@ -97,38 +97,41 @@ class _VoiceDashboardState extends State<VoiceDashboard>
       case 4:
         Navigator.pushNamed(context, '/profile-settings');
         break;
+      case 5:
+        Navigator.pushNamed(context, '/crex');
+        break;
     }
   }
 
-  void _toggleVoiceAssistant() {
-    setState(() {
-      _isListening = !_isListening;
-    });
+  // void _toggleVoiceAssistant() {
+  //   setState(() {
+  //     _isListening = !_isListening;
+  //   });
+  //
+  //   if (_isListening) {
+  //     // Start voice recognition
+  //     _startVoiceRecognition();
+  //   } else {
+  //     // Stop voice recognition
+  //     _stopVoiceRecognition();
+  //   }
+  // }
 
-    if (_isListening) {
-      // Start voice recognition
-      _startVoiceRecognition();
-    } else {
-      // Stop voice recognition
-      _stopVoiceRecognition();
-    }
-  }
+  // void _startVoiceRecognition() {
+  //   // Voice recognition implementation would go here
+  //   // For now, simulate listening for 3 seconds
+  //   Future.delayed(const Duration(seconds: 3), () {
+  //     if (mounted) {
+  //       setState(() {
+  //         _isListening = false;
+  //       });
+  //     }
+  //   });
+  // }
 
-  void _startVoiceRecognition() {
-    // Voice recognition implementation would go here
-    // For now, simulate listening for 3 seconds
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        setState(() {
-          _isListening = false;
-        });
-      }
-    });
-  }
-
-  void _stopVoiceRecognition() {
-    // Stop voice recognition implementation
-  }
+  // void _stopVoiceRecognition() {
+  //   // Stop voice recognition implementation
+  // }
 
   Future<void> _handleRefresh() async {
     setState(() {
@@ -287,6 +290,7 @@ class _VoiceDashboardState extends State<VoiceDashboard>
             Tab(text: 'Schedule'),
             Tab(text: 'Progress'),
             Tab(text: 'Profile'),
+            Tab(text: 'Crex'),
           ],
         ),
       ),

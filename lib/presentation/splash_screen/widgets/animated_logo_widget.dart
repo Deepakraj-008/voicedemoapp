@@ -82,39 +82,11 @@ class _AnimatedLogoWidgetState extends State<AnimatedLogoWidget>
             child: Container(
               width: widget.size,
               height: widget.size,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    widget.secondaryColor.withValues(alpha: 0.3),
-                    widget.secondaryColor.withValues(alpha: 0.1),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.3, 0.7, 1.0],
-                ),
-              ),
               child: Center(
-                child: Container(
-                  width: widget.size * 0.6,
-                  height: widget.size * 0.6,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: widget.primaryColor,
-                    boxShadow: [
-                      BoxShadow(
-                        color: widget.secondaryColor.withValues(alpha: 0.3),
-                        blurRadius: 20,
-                        spreadRadius: 5,
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: CustomIconWidget(
-                      iconName: 'mic',
-                      color: widget.secondaryColor,
-                      size: widget.size * 0.25,
-                    ),
-                  ),
+                child: CustomIconWidget(
+                  iconName: 'mic',
+                  color: widget.secondaryColor,
+                  size: widget.size * 0.4,
                 ),
               ),
             ),

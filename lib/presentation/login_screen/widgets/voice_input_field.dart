@@ -208,41 +208,45 @@ class _VoiceInputFieldState extends State<VoiceInputField>
               size: 20,
             ),
           ),
-          suffixIcon: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (widget.isPassword)
-                IconButton(
-                  icon: CustomIconWidget(
-                    iconName: _obscureText ? 'visibility' : 'visibility_off',
-                    color: colorScheme.onSurfaceVariant,
-                    size: 20,
+          suffixIcon: Container(
+            width: 80,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (widget.isPassword)
+                  IconButton(
+                    icon: CustomIconWidget(
+                      iconName: _obscureText ? 'visibility' : 'visibility_off',
+                      color: colorScheme.onSurfaceVariant,
+                      size: 20,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureText = !_obscureText;
+                      });
+                    },
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _obscureText = !_obscureText;
-                    });
+                AnimatedBuilder(
+                  animation: _pulseAnimation,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: _isRecording ? _pulseAnimation.value : 1.0,
+                      child: IconButton(
+                        icon: CustomIconWidget(
+                          iconName: _isRecording ? 'mic' : 'mic_none',
+                          color: _isRecording
+                              ? colorScheme.primary
+                              : colorScheme.onSurfaceVariant,
+                          size: 20,
+                        ),
+                        onPressed: _startVoiceInput,
+                      ),
+                    );
                   },
                 ),
-              AnimatedBuilder(
-                animation: _pulseAnimation,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _isRecording ? _pulseAnimation.value : 1.0,
-                    child: IconButton(
-                      icon: CustomIconWidget(
-                        iconName: _isRecording ? 'mic' : 'mic_none',
-                        color: _isRecording
-                            ? colorScheme.primary
-                            : colorScheme.onSurfaceVariant,
-                        size: 20,
-                      ),
-                      onPressed: _startVoiceInput,
-                    ),
-                  );
-                },
-              ),
-            ],
+              ],
+            ),
           ),
           filled: true,
           fillColor: colorScheme.surfaceContainerHighest,

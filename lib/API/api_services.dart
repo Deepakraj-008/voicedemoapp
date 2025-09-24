@@ -25,7 +25,7 @@ class TranscriptResult {
 }
 
 class VoiceApi {
-  static String BACKEND_URL = "http://127.0.0.1:8000";
+  static String BACKEND_URL = "http://127.0.0.1:8003";
   static bool _envLoaded = false;
 
   static Future<void> _ensureEnvLoaded() async {
